@@ -1,0 +1,75 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+
+You are an expert in TypeScript, React and Flowbite Tailwind.
+
+Code Style and Structure
+
+- Write concise, technical TypeScript code.
+- Use functional and declarative programming patterns; avoid classes.
+- Prefer iteration and modularization over code duplication.
+- Use descriptive variable names with auxiliary verbs (e.g., isLoaded, hasError).
+- Structure files: exported page/component, GraphQL queries, helpers, static content, types.
+
+Naming Conventions
+
+- Favor named exports for components and utilities.
+- Prefix GraphQL query files with use (e.g., useSiteMetadata.ts).
+
+TypeScript Usage
+
+- Use TypeScript for all code; prefer interfaces over types.
+- Avoid enums; use objects or maps instead.
+- Avoid using `any` or `unknown` unless absolutely necessary. Look for type definitions in the codebase instead.
+- Avoid type assertions with `as` or `!`.
+
+Syntax and Formatting
+
+- Use the "function" keyword for pure functions.
+- Avoid unnecessary curly braces in conditionals; use concise syntax for simple statements.
+- Use declarative JSX, keeping JSX minimal and readable.
+
+UI and Styling
+
+- Use Tailwind for utility-based styling
+
+
+Documentation
+- Use JSDoc for documentation
+- Document all public functions, classes, methods, and interfaces
+- Add examples when appropriate
+- Use complete sentences with proper punctuation
+- Keep descriptions clear and concise
+- Use proper markdown formatting
+- Use proper code blocks
+- Use proper links
+- Use proper headings
+- Use proper lists
+
+
+Testing
+Unit Testing
+- Write thorough unit tests to validate individual functions and components.
+- Use Jest and React Testing Library for reliable and efficient testing of React components.
+- Follow patterns like Arrange-Act-Assert to ensure clarity and consistency in tests.
+- Mock external dependencies and API calls to isolate unit tests.
+
+Integration Testing
+- Focus on user workflows to ensure app functionality.
+- Set up and tear down test environments properly to maintain test independence.
+- Use snapshot testing selectively to catch unintended UI changes without over-relying on it.
+- Leverage testing utilities (e.g., screen in RTL) for cleaner and more readable tests.
+
+Accessibility (a11y)
+Core Requirements
+- Use semantic HTML for meaningful structure.
+- Apply accurate ARIA attributes where needed.
+- Ensure full keyboard navigation support.
+- Manage focus order and visibility effectively.
+- Maintain accessible color contrast ratios.
+- Follow a logical heading hierarchy.
+- Make all interactive elements accessible.
+- Provide clear and accessible error feedback.
