@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import { Button } from 'flowbite-react'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { LoginModal } from './components/LoginModal'
 import { Navigation } from './components/Navigation'
 import { Projects } from './pages/Projects'
 import './App.css'
+import { AuthProvider, useAuthContext } from './context/AuthContext';
 
 function Home() {
   const [showLoginModal, setShowLoginModal] = useState(false)
@@ -22,26 +23,39 @@ function Home() {
           Sign In
         </Button>
       </div>
-      <LoginModal 
-        show={showLoginModal} 
-        onClose={() => setShowLoginModal(false)} 
+      <LoginModal
+        show={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
       />
     </div>
   )
 }
 
+function ProtectedRoute({ children }: { children: JSX.Element }) {
+  const { user, loading } = useAuthContext();
+  const isAuthenticated = !!user;
+
+  if (loading) {
+    return <div>Loading...</div>; // Show a loading indicator while fetching user data
+  }
+
+  return isAuthenticated ? children : <Navigate to="/" />;
+}
+
 function App() {
   return (
     <Router>
-      <div className="min-h-screen">
-        <Navigation />
-        <main className="container mx-auto px-4 py-8">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/projects" element={<Projects />} />
-          </Routes>
-        </main>
-      </div>
+      <AuthProvider>
+        <div className="min-h-screen">
+          <Navigation />
+          <main className="container mx-auto px-4 py-8">
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/projects" element={<ProtectedRoute><Projects /></ProtectedRoute>} />
+            </Routes>
+          </main>
+        </div>
+      </AuthProvider>
     </Router>
   )
 }
