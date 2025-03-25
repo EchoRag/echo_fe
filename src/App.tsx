@@ -3,7 +3,7 @@ import { Button } from 'flowbite-react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { LoginModal } from './components/LoginModal'
 import { Navigation } from './components/Navigation'
-import { Projects } from './pages/Projects'
+import Projects  from './pages/Projects'
 import './App.css'
 import { AuthProvider, useAuthContext } from './context/AuthContext';
 
