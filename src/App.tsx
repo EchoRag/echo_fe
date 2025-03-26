@@ -45,17 +45,22 @@ function ProtectedRoute({ children }: { children: JSX.Element }) {
 
 function AppLayout({ children }: { children: JSX.Element }) {
   const { user } = useAuthContext();
+  const [isSideNavCollapsed, setIsSideNavCollapsed] = useState(false);
   
   if (!user) {
     return children;
   }
 
   return (
-    <div className="flex">
-      <SideNav />
-      <div className="flex-1">
-        <Navigation />
-        <main className="container mx-auto px-4 py-8">
+    <div className="flex h-full">
+      <div className="fixed inset-y-0 left-0">
+        <SideNav onCollapseChange={setIsSideNavCollapsed} />
+      </div>
+      <div className={`flex-1 transition-all duration-300 ${isSideNavCollapsed ? 'ml-[60px]' : 'ml-64'}`}>
+        <div className={`fixed top-0 right-0 transition-all duration-300 ${isSideNavCollapsed ? 'left-[60px]' : 'left-64'} z-10`}>
+          <Navigation />
+        </div>
+        <main className="container mx-auto px-4 py-8 mt-16 overflow-y-auto">
           {children}
         </main>
       </div>

@@ -14,6 +14,10 @@ interface HistoryItem {
   isPinned: boolean;
 }
 
+interface SideNavProps {
+  onCollapseChange?: (isCollapsed: boolean) => void;
+}
+
 const mainNavItems: NavItem[] = [
   {
     name: 'New Chat',
@@ -30,7 +34,7 @@ const mainNavItems: NavItem[] = [
     name: 'Notifications',
     path: '/notifications',
     icon: (
-      <div data-testid="notification-icon" className="flex items-center justify-center w-5 h-5">
+      <div data-testid="notification-icon" className="flex text-center items-center justify-center w-5 h-5">
         <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
           <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 5.5V4M12 5.5a5 5 0 015 5v4.5m-5-9.5a5 5 0 00-5 5v4.5m5-9.5v9.5m-5 0h10m-10 0v1a5 5 0 0010 0v-1"/>
         </svg>
@@ -105,16 +109,23 @@ const bottomNavItems: NavItem[] = [
   },
 ];
 
-export function SideNav() {
-  const location = useLocation();
+export function SideNav({ onCollapseChange }: SideNavProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const location = useLocation();
+//   const navigate = useNavigate();
+
+  const handleCollapse = () => {
+    const newCollapsedState = !isCollapsed;
+    setIsCollapsed(newCollapsedState);
+    onCollapseChange?.(newCollapsedState);
+  };
 
   const renderNavItem = (item: NavItem) => {
     const isActive = location.pathname === item.path;
     const linkContent = (
       <div
         data-testid={`nav-item-${item.path.slice(1) || 'home'}`}
-        className={`flex items-center ${isCollapsed ? 'px-3' : 'px-6'} py-3 text-sm font-medium transition-colors duration-200 ${
+        className={`flex items-center ${isCollapsed ? 'px-3 justify-center' : 'px-6'} py-3 text-sm font-medium transition-colors duration-200 ${
           isActive
             ? 'text-white bg-black/20'
             : 'text-gray-100 hover:text-white hover:bg-black/10'
@@ -150,7 +161,7 @@ export function SideNav() {
       <button
         data-testid="toggle-button"
         className="w-12 h-12 p-3 text-white hover:bg-black/10 transition-colors duration-200 flex items-center justify-center"
-        onClick={() => setIsCollapsed(!isCollapsed)}
+        onClick={handleCollapse}
         title={isCollapsed ? 'Expand' : 'Collapse'}
       >
         <svg
