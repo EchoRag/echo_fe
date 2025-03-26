@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from 'flowbite-react';
 import { AddProjectModal } from '../components/AddProjectModal';
-
-// import { Card } from 'flowbite-react';
+import useAxios from '../hooks/useAxios'; // Import useAxios
+import { API_PATHS } from '../utils/apiPaths'; // Import API paths
 
 interface Project {
   id: string;
@@ -11,49 +11,23 @@ interface Project {
   status: 'active' | 'completed' | 'on-hold';
 }
 
-const mockProjects: Project[] = [
-  {
-    id: '1',
-    name: 'Echo Platform',
-    description: 'A modern project management platform with real-time collaboration features and intuitive interface.',
-    status: 'active'
-  },
-  {
-    id: '2',
-    name: 'Data Analytics Dashboard',
-    description: 'Real-time analytics visualization platform with customizable widgets and reporting tools.',
-    status: 'completed'
-  },
-  {
-    id: '3',
-    name: 'Mobile App Development',
-    description: 'Cross-platform mobile application built with React Native for iOS and Android devices.',
-    status: 'on-hold'
-  },
-  {
-    id: '4',
-    name: 'Web Development',
-    description: 'Responsive web application built with React and Next.js for desktop and mobile devices.',
-    status: 'active'
-  }
-  ,
-  {
-    id: '5',
-    name: 'Cloud Infrastructure',
-    description: 'Enterprise-grade cloud infrastructure setup with automated scaling and monitoring capabilities.',
-    status: 'active'
-  },
-  {
-    id: '6',
-    name: 'AI Integration',
-    description: 'Machine learning models integration for predictive analytics and automated decision making.',
-    status: 'on-hold'
-  }
-];
-
 export default function Projects() {
-  const [projects, setProjects] = useState<Project[]>(mockProjects);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [showModal, setShowModal] = useState(false);
+  const axios = useAxios(); // Initialize axios instance
+
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const response = await axios.get(API_PATHS.PROJECTS);
+        setProjects(response.data);
+      } catch (error) {
+        console.error('Failed to fetch projects:', error);
+      }
+    };
+
+    fetchProjects();
+  }, [axios]);
 
   const handleAddProject = (newProject: { name: string; description: string }) => {
     const newProjectWithId: Project = {
@@ -123,4 +97,4 @@ export default function Projects() {
       />
     </div>
   );
-} 
+}
