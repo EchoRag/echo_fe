@@ -26,6 +26,16 @@
   --gradient-end: rgb(206, 164, 188);  /* Pink tone */
 }
 
+.bg-gradient-custom {
+  background: linear-gradient(
+    180deg,
+    var(--gradient-start) 0%,
+    var(--gradient-middle) 50%,
+    var(--gradient-end) 100%
+  );
+  background-attachment: fixed;
+}
+
 a {
   font-weight: 500;
   color: #646cff;
