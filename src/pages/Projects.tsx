@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Button } from 'flowbite-react';
 import { AddProjectModal } from '../components/AddProjectModal';
-import useAxios from '../hooks/useAxios'; // Import useAxios
-import { API_PATHS } from '../utils/apiPaths'; // Import API paths
+import { EditProjectModal } from '../components/EditProjectModal'; // Import Edit Modal
+import useAxios from '../hooks/useAxios';
+import { API_PATHS } from '../utils/apiPaths';
 
 interface Project {
   id: string;
@@ -13,8 +14,9 @@ interface Project {
 
 export default function Projects() {
   const [projects, setProjects] = useState<Project[]>([]);
-  const [showModal, setShowModal] = useState(false);
-  const axios = useAxios(); // Initialize axios instance
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [editProject, setEditProject] = useState<Project | null>(null); // State for editing project
+  const axios = useAxios();
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -25,20 +27,27 @@ export default function Projects() {
         console.error('Failed to fetch projects:', error);
       }
     };
-
     fetchProjects();
   }, [axios]);
 
-  const handleAddProject = (newProject: { name: string; description: string }) => {
-    const newProjectWithId: Project = {
-      id: (projects.length + 1).toString(),
-      name: newProject.name,
-      description: newProject.description,
-      status: 'active'
-    };
-    
-    setProjects([...projects, newProjectWithId]);
-    setShowModal(false);
+  const handleAddProject = async (newProject: { name: string; description: string }) => {
+    try {
+      const response = await axios.post(API_PATHS.PROJECTS, { ...newProject, status: 'active' });
+      setProjects([...projects, response.data]);
+    } catch (error) {
+      console.error('Failed to add project:', error);
+    }
+    setShowAddModal(false);
+  };
+
+  const handleUpdateProject = async (updatedProject: Project) => {
+    try {
+      await axios.put(`${API_PATHS.PROJECTS}/${updatedProject.id}`, updatedProject);
+      setProjects(projects.map((p) => (p.id === updatedProject.id ? updatedProject : p)));
+    } catch (error) {
+      console.error('Failed to update project:', error);
+    }
+    setEditProject(null);
   };
 
   return (
@@ -57,17 +66,11 @@ export default function Projects() {
                 </p>
               </div>
               <div className="flex flex-row justify-start items-center gap-3 w-full mt-auto">
-                <button type="button" className="text-white bg-[#2A3365] hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-3 py-2  text-center inline-flex items-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-                  Upload Documents
-                  <svg className="w-6 h-6 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                    <path stroke="currentColor" strokeLinecap="round" stroke-linejoin="round" strokeWidth="2" d="M12 5v9m-5 0H5a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4a1 1 0 0 0-1-1h-2M8 9l4-5 4 5m1 8h.01" />
-                  </svg>
-                </button>
-                <button type="button" className="text-white bg-[#2A3365] hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-small rounded-lg text-sm px-3 py-2  text-center inline-flex items-center me-2 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-                  Add Call
-                  <svg className="w-6 h-6 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                    <path stroke="currentColor" strokeLinecap="round" stroke-linejoin="round" strokeWidth="2" d="M18.427 14.768 17.2 13.542a1.733 1.733 0 0 0-2.45 0l-.613.613a1.732 1.732 0 0 1-2.45 0l-1.838-1.84a1.735 1.735 0 0 1 0-2.452l.612-.613a1.735 1.735 0 0 0 0-2.452L9.237 5.572a1.6 1.6 0 0 0-2.45 0c-3.223 3.2-1.702 6.896 1.519 10.117 3.22 3.221 6.914 4.745 10.12 1.535a1.601 1.601 0 0 0 0-2.456Z" />
-                  </svg>
+                <button
+                  onClick={() => setEditProject(project)}
+                  className="text-white bg-blue-600 hover:bg-blue-700 px-3 py-2 rounded-lg"
+                >
+                  Edit
                 </button>
               </div>
             </div>
@@ -79,7 +82,7 @@ export default function Projects() {
       <div className="flex justify-center mt-8">
         <Button 
           className="bg-[#2A3365] hover:bg-blue-800"
-          onClick={() => setShowModal(true)}
+          onClick={() => setShowAddModal(true)}
           data-testid="add-project-button"
         >
           <svg className="w-5 h-5 mr-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -91,10 +94,19 @@ export default function Projects() {
 
       {/* Add Project Modal */}
       <AddProjectModal 
-        show={showModal}
-        onClose={() => setShowModal(false)}
+        show={showAddModal}
+        onClose={() => setShowAddModal(false)}
         onAddProject={handleAddProject}
       />
+
+      {/* Edit Project Modal */}
+      {editProject && (
+        <EditProjectModal
+          project={editProject}
+          onClose={() => setEditProject(null)}
+          onUpdateProject={handleUpdateProject}
+        />
+      )}
     </div>
   );
 }
