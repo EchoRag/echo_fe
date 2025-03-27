@@ -29,8 +29,19 @@ const projectsSlice = createSlice({
       state.projects.push(newProject);
     },
     // Add other reducers as needed
+   updateProject: (
+      state,
+      action: PayloadAction<{ id: string; name: string; description: string }>
+    ) => {
+      const { id, name, description } = action.payload;
+      const project = state.projects.find((proj) => proj.id === id);
+      if (project) {
+        project.name = name;
+        project.description = description;
+      }
+    },
   },
 });
 
-export const { addProject } = projectsSlice.actions;
+export const { addProject,updateProject } = projectsSlice.actions;
 export default projectsSlice.reducer;
