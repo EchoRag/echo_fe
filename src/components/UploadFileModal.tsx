@@ -82,7 +82,7 @@ export function UploadFileModal({ show, onClose, onUpload }: UploadFileModalProp
                     type="file"
                     className="hidden"
                     onChange={handleFileSelect}
-                    accept=".pdf,.doc,.docx,.mp3,.mp4"
+                    accept=".pdf,.doc,.docx,.mp3,.mp4,.txt"
                     data-testid="file-input"
                   />
                 </div>
