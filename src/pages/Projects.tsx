@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Button } from 'flowbite-react';
 import { AddProjectModal } from '../components/AddProjectModal';
-import { EditProjectModal } from '../components/EditProjectModal'; // Import Edit Modal
+import { EditProjectModal } from '../components/EditProjectModal';
+import { UploadFileModal } from '../components/UploadFileModal';
 import useAxios from '../hooks/useAxios';
 import { API_PATHS } from '../utils/apiPaths';
 import { Link } from 'react-router-dom';
+
 
 interface Project {
   id: string;
@@ -18,6 +20,10 @@ export default function Projects() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [editProject, setEditProject] = useState<Project | null>(null); // State for editing project
   const axios = useAxios();
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
+  const axios = useAxios(); // Initialize axios instance
+
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -30,6 +36,7 @@ export default function Projects() {
     };
     fetchProjects();
   }, [axios]);
+
 
   const handleAddProject = async (newProject: { name: string; description: string }) => {
     try {
@@ -51,8 +58,39 @@ export default function Projects() {
     setEditProject(null);
   };
 
+  const handleUploadFile = async (fileData: {
+    file: File;
+    fileName: string;
+    isCallRecording: boolean;
+    isCallTranscript: boolean;
+  }) => {
+    if (!selectedProjectId) return;
+
+    try {
+      const formData = new FormData();
+      formData.append('file', fileData.file);
+      formData.append('fileName', fileData.fileName);
+      formData.append('isCallRecording', fileData.isCallRecording.toString());
+      formData.append('isCallTranscript', fileData.isCallTranscript.toString());
+      formData.append('projectId', selectedProjectId);
+
+      await axios.post(API_PATHS.UPLOAD_FILE, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      // Handle success (e.g., show notification, update UI)
+      console.log('File uploaded successfully');
+    } catch (error) {
+      console.error('Failed to upload file:', error);
+      throw error;
+    }
+
+  };
+
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8 h-screen">
       <h1 className="text-3xl font-bold text-gray-900 text-center mb-8 drop-shadow-lg">Projects</h1>
 
       {/* Projects Grid */}
@@ -63,17 +101,34 @@ export default function Projects() {
               <h5 className="text-2xl font-bold text-gray-900">{project.name}</h5>
               <p className="text-base font-normal text-gray-500">{project.description}</p>
             </div>
-            <div className="flex gap-3 mt-4">
+            <div className="flex flex-wrap gap-3 mt-4">
+              {/* Edit Project Button */}
               <button
                 onClick={() => setEditProject(project)}
                 className="text-white bg-blue-600 hover:bg-blue-700 px-3 py-2 rounded-lg"
               >
                 Edit
               </button>
-              <Link 
-                to={`/projects/${project.id}`} 
-                className="text-blue-500 hover:underline px-3 py-2"
+
+              {/* Upload Documents Button */}
+              <button
+                type="button"
+                className="text-white bg-[#2A3365] hover:bg-blue-800 px-3 py-2 rounded-lg"
+                onClick={() => {
+                  setSelectedProjectId(project.id);
+                  setShowUploadModal(true);
+                }}
               >
+                Upload Documents
+              </button>
+
+              {/* Add Call Button */}
+              <button type="button" className="text-white bg-[#2A3365] hover:bg-blue-800 px-3 py-2 rounded-lg">
+                Add Call
+              </button>
+
+              {/* View Details Link */}
+              <Link to={`/projects/${project.id}`} className="text-blue-500 hover:underline px-3 py-2">
                 View Details
               </Link>
             </div>
@@ -86,7 +141,6 @@ export default function Projects() {
         <Button 
           className="bg-[#2A3365] hover:bg-blue-800"
           onClick={() => setShowAddModal(true)}
-          data-testid="add-project-button"
         >
           <svg className="w-5 h-5 mr-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
             <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 5v14m-7-7h14" />
@@ -110,6 +164,16 @@ export default function Projects() {
           onUpdateProject={handleUpdateProject}
         />
       )}
+
+      {/* Upload File Modal */}
+      <UploadFileModal
+        show={showUploadModal}
+        onClose={() => {
+          setShowUploadModal(false);
+          setSelectedProjectId(null);
+        }}
+        onUpload={handleUploadFile}
+      />
     </div>
   );
 }
