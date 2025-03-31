@@ -39,6 +39,49 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setLoading(false);
   }, []);
 
+  // Check token expiration using token expiry
+  useEffect(() => {
+    if (token) {
+      const checkTokenExpiration = async () => {
+        if (browserStorage.isTokenExpired()) {
+          console.log('Token expired, attempting to refresh');
+          try {
+            // Try to get a new token from Clerk
+            const newToken = await getToken();
+            if (newToken) {
+              console.log('Successfully refreshed token');
+              browserStorage.setAuthData({
+                token: newToken as string,
+                user: user as UserData,
+              });
+              setToken(newToken);
+              return;
+            }
+          } catch (error) {
+            console.error('Error refreshing token:', error);
+          }
+          
+          // If we couldn't refresh the token, then clear auth data
+          console.log('Failed to refresh token, clearing auth data');
+          browserStorage.clearAuthData();
+          setUser(null);
+          setToken(null);
+        }
+      };
+
+      // Get token expiry time
+      const tokenExpiry = browserStorage.getTokenExpiry();
+      if (tokenExpiry) {
+        const timeUntilExpiry = tokenExpiry - Date.now();
+        console.log(`Setting token expiry timeout for ${Math.round(timeUntilExpiry / 1000)} seconds`);
+        
+        // Set a timeout to check token expiration
+        const timeout = setTimeout(checkTokenExpiration, timeUntilExpiry);
+        return () => clearTimeout(timeout);
+      }
+    }
+  }, [token, getToken, user]);
+
   // Update auth state when Clerk auth changes
   useEffect(() => {
     const fetchToken = async () => {
@@ -67,11 +110,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           setToken(token);
         } catch (error) {
           console.error('Error fetching token:', error);
+          console.log('Clearing auth data due to token fetch error');
           browserStorage.clearAuthData();
           setUser(null);
           setToken(null);
         }
       } else {
+        console.log('User not signed in, clearing auth data');
         browserStorage.clearAuthData();
         setUser(null);
         setToken(null);
@@ -83,26 +128,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       fetchToken();
     }
   }, [isSignedIn, getToken, isLoaded, clerkUser]);
-
-  // Check token expiration periodically
-  useEffect(() => {
-    if (token) {
-      const checkTokenExpiration = () => {
-        if (browserStorage.isTokenExpired()) {
-          browserStorage.clearAuthData();
-          setUser(null);
-          setToken(null);
-        }
-      };
-
-      // Check immediately
-      checkTokenExpiration();
-
-      // Check every minute
-      const interval = setInterval(checkTokenExpiration, 60000);
-      return () => clearInterval(interval);
-    }
-  }, [token]);
 
   const signOut = () => {
     browserStorage.clearAuthData();
