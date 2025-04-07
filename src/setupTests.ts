@@ -1,4 +1,9 @@
 import '@testing-library/jest-dom';
+import { TextEncoder, TextDecoder } from 'util';
+
+// Add missing globals
+global.TextEncoder = TextEncoder;
+global.TextDecoder = TextDecoder as any;
 
 class MockTextEncoder {
   encode(input?: string): Uint8Array {

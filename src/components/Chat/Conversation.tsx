@@ -17,7 +17,7 @@ function MessageBubble({ message }: { message: Message }) {
   });
   
   return (
-    <div className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-4`}>
+    <div data-testid="message-bubble" className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-4`}>
       <div
         className={`max-w-[70%] px-4 py-2 rounded-lg ${
           isUser
@@ -85,7 +85,7 @@ export function Conversation({ messages, isLoading }: ConversationProps) {
         {isLoading && (
           <div className="flex justify-start mb-4">
             <div className="bg-gray-100 rounded-lg p-4 max-w-[70%]">
-              <div className="flex space-x-2">
+              <div data-testid="loading-indicator" className="flex space-x-2">
                 <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" />
                 <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-100" />
                 <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-200" />
