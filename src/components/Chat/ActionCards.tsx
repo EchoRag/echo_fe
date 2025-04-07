@@ -11,7 +11,7 @@ function ActionCard({ icon, title, description, onClick }: ActionCardProps) {
       onClick={onClick}
       className="flex flex-col items-center p-6 bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-200 w-48 space-y-2"
     >
-      <div className="text-gray-800 w-12 h-12">
+      <div data-testid="action-card-icon" className="text-gray-800 w-12 h-12">
         {icon}
       </div>
       <h3 className="font-semibold text-gray-800">{title}</h3>
@@ -37,7 +37,7 @@ export function ActionCards() {
   };
 
   return (
-    <div className="flex gap-6 flex-wrap justify-center">
+    <div data-testid="action-cards-container" className="flex gap-6 flex-wrap justify-center">
       <ActionCard
         icon={
           <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
