@@ -1,5 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { Message } from './Chat';
+import ReactMarkdown from 'react-markdown';
+import { useTypewriter } from '../../hooks/useTypewriter';
 
 interface ConversationProps {
   messages: Message[];
@@ -8,6 +10,11 @@ interface ConversationProps {
 
 function MessageBubble({ message }: { message: Message }) {
   const isUser = message.sender === 'user';
+  const { displayedText } = useTypewriter({
+    text: message.content,
+    enabled: !isUser,
+    speed: 20,
+  });
   
   return (
     <div className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-4`}>
@@ -18,7 +25,38 @@ function MessageBubble({ message }: { message: Message }) {
             : 'bg-gray-100 text-gray-900 rounded-bl-none'
         }`}
       >
-        <p className="text-sm">{message.content}</p>
+        <div className="prose prose-sm max-w-none dark:prose-invert">
+          <ReactMarkdown
+            components={{
+              p: ({ children }) => <p className="text-sm mb-2">{children}</p>,
+              ul: ({ children }) => <ul className="list-disc pl-4 mb-2">{children}</ul>,
+              ol: ({ children }) => <ol className="list-decimal pl-4 mb-2">{children}</ol>,
+              li: ({ children }) => <li className="text-sm mb-1">{children}</li>,
+              strong: ({ children }) => (
+                <strong className={`font-semibold ${isUser ? 'text-blue-100' : 'text-gray-900'}`}>
+                  {children}
+                </strong>
+              ),
+              em: ({ children }) => (
+                <em className={`italic ${isUser ? 'text-blue-100' : 'text-gray-900'}`}>
+                  {children}
+                </em>
+              ),
+              code: ({ children }) => (
+                <code className="bg-gray-200 dark:bg-gray-800 rounded px-1 py-0.5 text-xs">
+                  {children}
+                </code>
+              ),
+              pre: ({ children }) => (
+                <pre className="bg-gray-200 dark:bg-gray-800 rounded p-2 overflow-x-auto text-xs">
+                  {children}
+                </pre>
+              ),
+            }}
+          >
+            {isUser ? message.content : displayedText}
+          </ReactMarkdown>
+        </div>
         <p className={`text-xs mt-1 ${isUser ? 'text-blue-100' : 'text-gray-500'}`}>
           {new Date(message.timestamp).toLocaleTimeString()}
         </p>

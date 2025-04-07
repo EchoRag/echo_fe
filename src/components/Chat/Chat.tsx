@@ -3,6 +3,8 @@ import { ChatInput } from './ChatInput';
 import { ActionCards } from './ActionCards';
 import { Conversation } from './Conversation';
 import { useAuthContext } from '../../context/AuthContext';
+import useAxios from '../../hooks/useAxios';
+import { API_PATHS } from '../../utils/apiPaths';
 
 export interface Message {
   id: string;
@@ -11,10 +13,16 @@ export interface Message {
   timestamp: Date;
 }
 
+interface ChatResponse {
+  response: string;
+}
+
 export function Chat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { user } = useAuthContext();
+  const axios = useAxios();
 
   const handleSendMessage = async (content: string) => {
     if (!content.trim()) return;
@@ -28,18 +36,32 @@ export function Chat() {
 
     setMessages(prev => [...prev, newMessage]);
     setIsLoading(true);
+    setError(null);
 
-    // TODO: Implement actual AI response logic
-    setTimeout(() => {
+    try {
+      const response = await axios.post<ChatResponse>(
+        `${import.meta.env.VITE_APP_CHAT_API_URI}${API_PATHS.CHAT_GENERATE}`,
+        {
+          prompt: content,
+          model: "llama3.2",
+          max_tokens: 1000,
+          temperature: 0.7
+        }
+      );
+
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
-        content: 'This is a mock response. Implement actual AI response here.',
+        content: response.data.response,
         sender: 'assistant',
         timestamp: new Date(),
       };
       setMessages(prev => [...prev, assistantMessage]);
+    } catch (err) {
+      setError('Failed to get response from the assistant. Please try again.');
+      console.error('Chat API error:', err);
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
   };
 
   return (
@@ -48,7 +70,7 @@ export function Chat() {
         // Initial state
         <div className="flex-1 flex flex-col items-center justify-center space-y-8 p-4">
           <div className="text-center space-y-4">
-            <img src="/echologo.svg" alt="Echo Logo" className="w-24 h-24 mx-auto" />
+            <img src="/echologo.svg" alt="Echo Logo" className="w-24 h-24 mx-auto border border-gray-800 bg-gray-800 p-1 rounded" />
             <h1 className="text-4xl font-bold text-gray-800">Hi, {user?.name || 'Guest'}</h1>
             <p className="text-xl text-gray-600">Can I help you with anything?</p>
             <p className="text-sm text-gray-500">
@@ -64,6 +86,11 @@ export function Chat() {
         // Conversation state
         <div className="flex-1 flex flex-col">
           <Conversation messages={messages} isLoading={isLoading} />
+          {error && (
+            <div className="p-2 text-red-500 text-sm text-center">
+              {error}
+            </div>
+          )}
           <div className="p-4 border-t">
             <ChatInput onSend={handleSendMessage} />
           </div>
