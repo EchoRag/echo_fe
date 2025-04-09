@@ -26,6 +26,7 @@ const useAxiosInterceptor = (token: string | null) => {
       },
       (error) => {
         if (error.response && error.response.status === 401) {
+          console.log('Received 401 error, redirecting to root');
           // Handle unauthorized errors
           window.location.href = '/';
         }
