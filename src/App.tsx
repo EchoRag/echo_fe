@@ -62,7 +62,7 @@ function App() {
         <LoginModalProvider>
           <AppLayout>
             <Routes>
-              <Route path="/" element={<Chat />} />
+              <Route path="/" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
               <Route path="/projects" element={<ProtectedRoute><Projects /></ProtectedRoute>} />
               <Route path="/calendar" element={<ProtectedRoute><div>Calendar Page (Coming Soon)</div></ProtectedRoute>} />
               <Route path="/tasks" element={<ProtectedRoute><div>Tasks Page (Coming Soon)</div></ProtectedRoute>} />

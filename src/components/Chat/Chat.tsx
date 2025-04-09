@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ChatInput } from './ChatInput';
 import { ActionCards } from './ActionCards';
 import { Conversation } from './Conversation';
@@ -15,14 +15,35 @@ export interface Message {
 
 interface ChatResponse {
   response: string;
+  conversation_id: string;
 }
 
 export function Chat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [conversationId, setConversationId] = useState<string | null>(null);
   const { user } = useAuthContext();
   const axios = useAxios();
+
+  // Initialize conversation ID from URL if present
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const urlConversationId = params.get('conversation_id');
+    if (urlConversationId) {
+      setConversationId(urlConversationId);
+      // TODO: Fetch conversation history using the conversation ID
+    }
+  }, []);
+
+  // Update URL when conversation ID changes
+  useEffect(() => {
+    if (conversationId) {
+      const url = new URL(window.location.href);
+      url.searchParams.set('conversation_id', conversationId);
+      window.history.pushState({}, '', url.toString());
+    }
+  }, [conversationId]);
 
   const handleSendMessage = async (content: string) => {
     if (!content.trim()) return;
@@ -45,7 +66,8 @@ export function Chat() {
           prompt: content,
           model: "llama3.2",
           max_tokens: 1000,
-          temperature: 0.7
+          temperature: 0.7,
+          conversation_id: conversationId
         }
       );
 
@@ -56,6 +78,11 @@ export function Chat() {
         timestamp: new Date(),
       };
       setMessages(prev => [...prev, assistantMessage]);
+      
+      // Update conversation ID from response
+      if (response.data.conversation_id) {
+        setConversationId(response.data.conversation_id);
+      }
     } catch (err) {
       setError('Failed to get response from the assistant. Please try again.');
       console.error('Chat API error:', err);
