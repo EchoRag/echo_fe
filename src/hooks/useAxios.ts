@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { useEffect } from 'react';
 import { useAuthContext } from '../context/AuthContext';
+import { faro } from '../utils/faroConfig';
 
 const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_APP_API_URI,
@@ -14,6 +15,17 @@ const useAxiosInterceptor = (token: string | null) => {
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
         }
+        
+        // Add Faro trace ID to headers
+        const otel = faro.api.getOTEL();
+        if (otel) {
+          const span = otel.trace.getTracer('http-request').startSpan('http-request');
+          if (span) {
+            config.headers['X-Trace-Id'] = span.spanContext().traceId;
+            span.end();
+          }
+        }
+        
         return config;
       },
       (error) => {
@@ -48,7 +60,5 @@ const useAxios = () => {
   useAxiosInterceptor(jwt);
 
   return axiosInstance;
-};
-
-export default useAxios;
+}
 

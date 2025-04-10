@@ -3,7 +3,7 @@ import { initializeFaro, createReactRouterV6DataOptions, ReactIntegration, getWe
 import { TracingInstrumentation } from '@grafana/faro-web-tracing';
 
 const faroInstance = initializeFaro({
-  url: import.meta.env.VITE_APP_FARO_URL || 'https://faro-collector-prod-ap-south-1.grafana.net/collect/5c286c0c098517da5d739ba243fbbd37',
+  url: import.meta.env.VITE_APP_FARO_URL || 'https://localhost:3020',
   app: {
     name: 'echo-fe',
     version: '1.0.0',
