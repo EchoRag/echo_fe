@@ -55,7 +55,7 @@ const useAxiosInterceptor = (token: string | null) => {
   }, [token]);
 };
 
-const useAxios = () => {
+export const useAxios = () => {
   const { jwt } = useAuthContext();
   useAxiosInterceptor(jwt);
 
