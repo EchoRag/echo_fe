@@ -13,6 +13,8 @@
   },
   "dependencies": {
     "@clerk/clerk-react": "^4.32.5",
+    "@grafana/faro-react": "^1.15.0",
+    "@grafana/faro-web-sdk": "^1.15.0",
     "@reduxjs/toolkit": "^2.6.1",
     "@types/react-router-dom": "^5.3.3",
     "axios": "^1.8.4",
@@ -26,6 +28,7 @@
     "react-router-dom": "^6.22.3"
   },
   "devDependencies": {
+    "@grafana/faro-rollup-plugin": "^0.5.0",
     "@jest/types": "^29.6.3",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^14.3.1",

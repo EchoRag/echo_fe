@@ -5,6 +5,7 @@ import { Conversation } from './Conversation';
 import { useAuthContext } from '../../context/AuthContext';
 import useAxios from '../../hooks/useAxios';
 import { API_PATHS } from '../../utils/apiPaths';
+import { faro } from '../../utils/faroConfig';
 
 export interface Message {
   id: string;
@@ -33,6 +34,9 @@ export function Chat() {
     if (urlConversationId) {
       setConversationId(urlConversationId);
       // TODO: Fetch conversation history using the conversation ID
+      faro.pushEvent('conversation_loaded', {
+        conversation_id: urlConversationId,
+      });
     }
   }, []);
 
@@ -42,6 +46,9 @@ export function Chat() {
       const url = new URL(window.location.href);
       url.searchParams.set('conversation_id', conversationId);
       window.history.pushState({}, '', url.toString());
+      faro.pushEvent('conversation_id_updated', {
+        conversation_id: conversationId,
+      });
     }
   }, [conversationId]);
 
@@ -60,6 +67,11 @@ export function Chat() {
     setError(null);
 
     try {
+      faro.pushEvent('message_sent', {
+        conversation_id: conversationId,
+        message_length: content.length,
+      });
+
       const response = await axios.post<ChatResponse>(
         `${import.meta.env.VITE_APP_CHAT_API_URI}${API_PATHS.CHAT_GENERATE}`,
         {
@@ -83,9 +95,18 @@ export function Chat() {
       if (response.data.conversation_id) {
         setConversationId(response.data.conversation_id);
       }
+
+      faro.pushEvent('message_received', {
+        conversation_id: conversationId,
+        response_length: response.data.response.length,
+      });
     } catch (err) {
       setError('Failed to get response from the assistant. Please try again.');
       console.error('Chat API error:', err);
+      faro.pushEvent('message_error', {
+        conversation_id: conversationId,
+        error: err instanceof Error ? err.message : 'Unknown error',
+      });
     } finally {
       setIsLoading(false);
     }
