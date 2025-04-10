@@ -55,9 +55,11 @@ const useAxiosInterceptor = (token: string | null) => {
   }, [token]);
 };
 
-export default function useAxios() {
-  const { token } = useAuthContext();
-  useAxiosInterceptor(token);
+const useAxios = () => {
+  const { jwt } = useAuthContext();
+  useAxiosInterceptor(jwt);
+
   return axiosInstance;
 }
 
+export default useAxios;

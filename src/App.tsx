@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { Navigation } from './components/Navigation'
 import { SideNav } from './components/SideNav'
@@ -8,22 +8,38 @@ import Projects from './pages/Projects'
 import './App.css'
 import { AuthProvider, useAuthContext } from './context/AuthContext';
 import { LoginModalProvider, useLoginModal } from './context/LoginModalContext';
+import { useClerk, useAuth } from '@clerk/clerk-react';
 
-function ProtectedRoute({ children }: { children: JSX.Element }) {
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuthContext();
+  const { isSignedIn } = useAuth();
+  const { loaded: isClerkLoaded } = useClerk();
   const { openLoginModal } = useLoginModal();
 
-  if (loading) {
+  useEffect(() => {
+    // Only open login modal if we're sure the user is not signed in
+    if (isClerkLoaded && !isSignedIn && !loading && !user) {
+      openLoginModal();
+    }
+  }, [isClerkLoaded, isSignedIn, loading, user]);
+
+  // Show loading state while checking auth
+  if (loading || !isClerkLoaded) {
     return <div>Loading...</div>;
   }
 
-  if (!user) {
-    openLoginModal();
+  // If user is signed in with Clerk but not in our context yet, wait
+  if (isSignedIn && !user) {
+    return <div>Loading...</div>;
+  }
+
+  // If user is not signed in, redirect to home
+  if (!isSignedIn || !user) {
     return <Navigate to="/" replace />;
   }
 
-  return children;
-}
+  return <>{children}</>;
+};
 
 function AppLayout({ children }: { children: JSX.Element }) {
   const { user } = useAuthContext();

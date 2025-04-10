@@ -1,6 +1,6 @@
 import { useAuthContext } from '../context/AuthContext';
 
 export const useAuthToken = () => {
-  const { token } = useAuthContext();
-  return token;
+  const { jwt } = useAuthContext();
+  return jwt;
 };

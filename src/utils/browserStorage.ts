@@ -5,14 +5,17 @@ interface UserData {
 }
 
 interface AuthData {
-  token: string;
+  jwt: string;
+  sessionToken: string;
   user: UserData;
 }
 
 class BrowserStorage {
     private static readonly AUTH_KEY = 'auth_data';
-    private static readonly TOKEN_KEY = 'auth_token';
+    private static readonly JWT_KEY = 'jwt_token';
+    private static readonly SESSION_KEY = 'session_token';
     private static readonly USER_KEY = 'user_data';
+    private static readonly JWT_EXPIRY_KEY = 'jwt_expiry';
 
     setItem<T>(key: string, value: T): void {
         try {
@@ -59,16 +62,27 @@ class BrowserStorage {
     // Auth specific methods
     setAuthData(authData: AuthData): void {
         this.setItem(BrowserStorage.AUTH_KEY, authData);
-        this.setItem(BrowserStorage.TOKEN_KEY, authData.token);
+        this.setItem(BrowserStorage.JWT_KEY, authData.jwt);
+        this.setItem(BrowserStorage.SESSION_KEY, authData.sessionToken);
         this.setItem(BrowserStorage.USER_KEY, authData.user);
+        
+        // Set JWT expiry
+        if (authData.jwt) {
+            const payload = JSON.parse(atob(authData.jwt.split('.')[1]));
+            this.setItem(BrowserStorage.JWT_EXPIRY_KEY, payload.exp * 1000); // Convert to milliseconds
+        }
     }
 
     getAuthData(): AuthData | null {
         return this.getItem<AuthData>(BrowserStorage.AUTH_KEY);
     }
 
-    getToken(): string | null {
-        return this.getItem<string>(BrowserStorage.TOKEN_KEY);
+    getJwt(): string | null {
+        return this.getItem<string>(BrowserStorage.JWT_KEY);
+    }
+
+    getSessionToken(): string | null {
+        return this.getItem<string>(BrowserStorage.SESSION_KEY);
     }
 
     getUserData(): UserData | null {
@@ -77,40 +91,24 @@ class BrowserStorage {
 
     clearAuthData(): void {
         this.removeItem(BrowserStorage.AUTH_KEY);
-        this.removeItem(BrowserStorage.TOKEN_KEY);
+        this.removeItem(BrowserStorage.JWT_KEY);
+        this.removeItem(BrowserStorage.SESSION_KEY);
         this.removeItem(BrowserStorage.USER_KEY);
+        this.removeItem(BrowserStorage.JWT_EXPIRY_KEY);
     }
 
     isAuthenticated(): boolean {
-        return this.exists(BrowserStorage.TOKEN_KEY);
+        return this.exists(BrowserStorage.JWT_KEY) && this.exists(BrowserStorage.SESSION_KEY);
     }
 
-    // Helper method to check if token is expired
-    isTokenExpired(): boolean {
-        const token = this.getToken();
-        if (!token) return true;
-
-        try {
-            const payload = JSON.parse(atob(token.split('.')[1]));
-            const expiry = payload.exp * 1000; // Convert to milliseconds
-            return Date.now() >= expiry;
-        } catch (error) {
-            console.error('Error checking token expiration:', error);
-            return true;
-        }
+    isJwtExpired(): boolean {
+        const expiry = this.getItem<number>(BrowserStorage.JWT_EXPIRY_KEY);
+        if (!expiry) return true;
+        return Date.now() >= expiry;
     }
 
-    getTokenExpiry(): number | null {
-        const token = this.getToken();
-        if (!token) return null;
-
-        try {
-            const payload = JSON.parse(atob(token.split('.')[1]));
-            return payload.exp * 1000; // Convert to milliseconds
-        } catch (error) {
-            console.error('Error getting token expiry:', error);
-            return null;
-        }
+    getJwtExpiry(): number | null {
+        return this.getItem<number>(BrowserStorage.JWT_EXPIRY_KEY);
     }
 }
 
