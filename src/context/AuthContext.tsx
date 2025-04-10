@@ -1,5 +1,5 @@
 import { ReactNode, createContext, useContext, useEffect, useState } from 'react';
-import { useAuth, useUser } from '@clerk/clerk-react';
+import { useAuth, useUser, useClerk } from '@clerk/clerk-react';
 import { browserStorage } from '../utils/browserStorage';
 
 interface UserData {
@@ -10,14 +10,16 @@ interface UserData {
 
 interface AuthContextType {
   user: UserData | null;
-  token: string | null;
+  jwt: string | null;
+  sessionToken: string | null;
   loading: boolean;
   signOut: () => void;
 }
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
-  token: null,
+  jwt: null,
+  sessionToken: null,
   loading: true,
   signOut: () => {},
 });
@@ -25,8 +27,10 @@ const AuthContext = createContext<AuthContextType>({
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const { isSignedIn, getToken } = useAuth();
   const { user: clerkUser, isLoaded } = useUser();
+  const { signOut: clerkSignOut } = useClerk();
   const [user, setUser] = useState<UserData | null>(null);
-  const [token, setToken] = useState<string | null>(null);
+  const [jwt, setJwt] = useState<string | null>(null);
+  const [sessionToken, setSessionToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   // Initialize auth state from browser storage
@@ -34,63 +38,70 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const storedAuthData = browserStorage.getAuthData();
     if (storedAuthData) {
       setUser(storedAuthData.user);
-      setToken(storedAuthData.token);
+      setJwt(storedAuthData.jwt);
+      setSessionToken(storedAuthData.sessionToken);
     }
     setLoading(false);
   }, []);
 
-  // Check token expiration using token expiry
+  // Check JWT expiration
   useEffect(() => {
-    if (token) {
-      const checkTokenExpiration = async () => {
-        if (browserStorage.isTokenExpired()) {
-          console.log('Token expired, attempting to refresh');
+    if (jwt) {
+      const checkJwtExpiration = async () => {
+        if (browserStorage.isJwtExpired()) {
+          console.log('JWT expired, attempting to refresh');
           try {
-            // Try to get a new token from Clerk with echo_default template
-            const newToken = await getToken();
-            if (newToken) {
-              console.log('Successfully refreshed token');
-              browserStorage.setAuthData({
-                token: newToken as string,
-                user: user as UserData,
-              });
-              setToken(newToken);
+            // Get new JWT from Clerk with echo_default template
+            const newJwt = await getToken({ template: 'echo_default' });
+            if (newJwt) {
+              console.log('Successfully refreshed JWT');
+              const authData = browserStorage.getAuthData();
+              if (authData) {
+                browserStorage.setAuthData({
+                  ...authData,
+                  jwt: newJwt,
+                });
+                setJwt(newJwt);
+              }
               return;
             }
           } catch (error) {
-            console.error('Error refreshing token:', error);
+            console.error('Error refreshing JWT:', error);
           }
           
-          // If we couldn't refresh the token, then clear auth data
-          console.log('Failed to refresh token, clearing auth data');
+          // If we couldn't refresh the JWT, then clear auth data
+          console.log('Failed to refresh JWT, clearing auth data');
           browserStorage.clearAuthData();
           setUser(null);
-          setToken(null);
+          setJwt(null);
+          setSessionToken(null);
         }
       };
 
-      // Get token expiry time
-      const tokenExpiry = browserStorage.getTokenExpiry();
-      if (tokenExpiry) {
-        const timeUntilExpiry = tokenExpiry - Date.now();
-        console.log(`Setting token expiry timeout for ${Math.round(timeUntilExpiry / 1000)} seconds`);
+      const jwtExpiry = browserStorage.getJwtExpiry();
+      if (jwtExpiry) {
+        const timeUntilExpiry = jwtExpiry - Date.now();
+        console.log(`Setting JWT expiry timeout for ${Math.round(timeUntilExpiry / 1000)} seconds`);
         
-        // Set a timeout to check token expiration
-        const timeout = setTimeout(checkTokenExpiration, timeUntilExpiry);
+        const timeout = setTimeout(checkJwtExpiration, timeUntilExpiry);
         return () => clearTimeout(timeout);
       }
     }
-  }, [token, getToken, user]);
+  }, [jwt, getToken]);
 
   // Update auth state when Clerk auth changes
   useEffect(() => {
-    const fetchToken = async () => {
+    const fetchTokens = async () => {
       if (!isLoaded) return;
 
       if (isSignedIn && clerkUser) {
         try {
-          // Get token with echo_default template for API calls
-          const token = await getToken();
+          // Get both tokens concurrently
+          const [jwtToken, sessionToken] = await Promise.all([
+            getToken({ template: 'echo_default' }),
+            getToken(),
+          ]);
+
           const email = clerkUser.primaryEmailAddress?.emailAddress;
           
           if (!email) {
@@ -105,41 +116,54 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
           // Store in browser storage
           browserStorage.setAuthData({
-            token: token as string,
+            jwt: jwtToken as string,
+            sessionToken: sessionToken as string,
             user: userData,
           });
 
           setUser(userData);
-          setToken(token);
+          setJwt(jwtToken);
+          setSessionToken(sessionToken);
         } catch (error) {
-          console.error('Error fetching token:', error);
+          console.error('Error fetching tokens:', error);
           console.log('Clearing auth data due to token fetch error');
           browserStorage.clearAuthData();
           setUser(null);
-          setToken(null);
+          setJwt(null);
+          setSessionToken(null);
         }
       } else {
         console.log('User not signed in, clearing auth data');
         browserStorage.clearAuthData();
         setUser(null);
-        setToken(null);
+        setJwt(null);
+        setSessionToken(null);
       }
       setLoading(false);
     };
 
     if (isLoaded) {
-      fetchToken();
+      fetchTokens();
     }
   }, [isSignedIn, getToken, isLoaded, clerkUser]);
 
-  const signOut = () => {
-    browserStorage.clearAuthData();
-    setUser(null);
-    setToken(null);
+  const signOut = async () => {
+    try {
+      // Clear local storage first
+      browserStorage.clearAuthData();
+      setUser(null);
+      setJwt(null);
+      setSessionToken(null);
+      
+      // Then sign out from Clerk
+      await clerkSignOut();
+    } catch (error) {
+      console.error('Error during sign out:', error);
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, signOut }}>
+    <AuthContext.Provider value={{ user, jwt, sessionToken, loading, signOut }}>
       {children}
     </AuthContext.Provider>
   );

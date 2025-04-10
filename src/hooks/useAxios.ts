@@ -44,8 +44,8 @@ const useAxiosInterceptor = (token: string | null) => {
 };
 
 const useAxios = () => {
-  const { token } = useAuthContext();
-  useAxiosInterceptor(token);
+  const { jwt } = useAuthContext();
+  useAxiosInterceptor(jwt);
 
   return axiosInstance;
 };

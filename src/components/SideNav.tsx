@@ -1,17 +1,12 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { useConversations } from '../hooks/useConversations';
 import { NotificationPopover } from './NotificationPopover';
 
 interface NavItem {
   name: string;
   path: string;
   icon: JSX.Element;
-}
-
-interface HistoryItem {
-  name: string;
-  path: string;
-  isPinned: boolean;
 }
 
 interface SideNavProps {
@@ -65,14 +60,6 @@ const mainNavItems: NavItem[] = [
   },
 ];
 
-const historyItems: HistoryItem[] = [
-  { name: 'API Integration Discussion', path: '/chat/1', isPinned: true },
-  { name: 'Database Schema Planning', path: '/chat/2', isPinned: true },
-  { name: 'UI Component Library', path: '/chat/3', isPinned: false },
-  { name: 'Authentication Flow', path: '/chat/4', isPinned: false },
-  { name: 'Performance Optimization', path: '/chat/5', isPinned: false },
-];
-
 const bottomNavItems: NavItem[] = [
   {
     name: 'Logs',
@@ -112,7 +99,7 @@ const bottomNavItems: NavItem[] = [
 export function SideNav({ onCollapseChange }: SideNavProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const location = useLocation();
-//   const navigate = useNavigate();
+  const { conversations, loading, error } = useConversations();
 
   const handleCollapse = () => {
     const newCollapsedState = !isCollapsed;
@@ -156,6 +143,68 @@ export function SideNav({ onCollapseChange }: SideNavProps) {
     );
   };
 
+  const renderConversations = () => {
+    if (loading) {
+      return (
+        <div className="px-3 py-2">
+          <div className="flex items-center justify-center h-[200px]">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-300"></div>
+          </div>
+        </div>
+      );
+    }
+
+    if (error) {
+      return (
+        <div className="px-3 py-2">
+          <div className="text-red-500 text-sm text-center">Error loading conversations</div>
+        </div>
+      );
+    }
+
+    return (
+      <>
+        {/* Pinned History */}
+        {!isCollapsed && conversations.filter(item => item.isPinned).length > 0 && (
+          <div data-testid="pinned-chats" className="px-3 py-2">
+            <h3 className="text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2 px-3">Pinned Chats</h3>
+            <ul className="max-h-[200px] overflow-y-auto">
+              {conversations.filter(item => item.isPinned).map((item) => (
+                <li key={item.id}>
+                  <Link
+                    to={item.path}
+                    className="flex items-center px-3 py-2 text-sm text-gray-100 hover:text-white hover:bg-black/10 rounded-md"
+                  >
+                    <span className="truncate">{item.name}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* Recent History */}
+        {!isCollapsed && (
+          <div data-testid="recent-chats" className="px-3 py-2">
+            <h3 className="text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2 px-3">Recent Chats</h3>
+            <ul className="max-h-[200px] overflow-y-auto">
+              {conversations.filter(item => !item.isPinned).map((item) => (
+                <li key={item.id}>
+                  <Link
+                    to={item.path}
+                    className="flex items-center px-3 py-2 text-sm text-gray-100 hover:text-white hover:bg-black/10 rounded-md"
+                  >
+                    <span className="truncate">{item.name}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </>
+    );
+  };
+
   return (
     <div data-testid="sidenav" className={`flex flex-col ${isCollapsed ? 'w-[60px]' : 'w-64'} h-screen border-r border-gray-700/30 bg-gradient-custom transition-all duration-300`}>
       <button
@@ -189,43 +238,8 @@ export function SideNav({ onCollapseChange }: SideNavProps) {
           ))}
         </ul>
 
-        {/* Pinned History */}
-        {!isCollapsed && (
-          <div data-testid="pinned-chats" className="px-3 py-2">
-            <h3 className="text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2 px-3">Pinned Chats</h3>
-            <ul>
-              {historyItems.filter(item => item.isPinned).map((item) => (
-                <li key={item.path}>
-                  <Link
-                    to={item.path}
-                    className="flex items-center px-3 py-2 text-sm text-gray-100 hover:text-white hover:bg-black/10 rounded-md"
-                  >
-                    <span className="truncate">{item.name}</span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-
-        {/* Recent History */}
-        {!isCollapsed && (
-          <div data-testid="recent-chats" className="px-3 py-2">
-            <h3 className="text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2 px-3">Recent Chats</h3>
-            <ul>
-              {historyItems.filter(item => !item.isPinned).map((item) => (
-                <li key={item.path}>
-                  <Link
-                    to={item.path}
-                    className="flex items-center px-3 py-2 text-sm text-gray-100 hover:text-white hover:bg-black/10 rounded-md"
-                  >
-                    <span className="truncate">{item.name}</span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+        {/* Conversations Section */}
+        {!isCollapsed && renderConversations()}
       </nav>
 
       {/* Bottom Navigation Items */}
