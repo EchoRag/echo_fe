@@ -12,15 +12,14 @@ import { LoginModalProvider, useLoginModal } from './context/LoginModalContext';
 function ProtectedRoute({ children }: { children: JSX.Element }) {
   const { user, loading } = useAuthContext();
   const { openLoginModal } = useLoginModal();
-  const isAuthenticated = !!user;
 
   if (loading) {
     return <div>Loading...</div>;
   }
 
-  if (!isAuthenticated) {
+  if (!user) {
     openLoginModal();
-    return <Navigate to="/" />;
+    return <Navigate to="/" replace />;
   }
 
   return children;

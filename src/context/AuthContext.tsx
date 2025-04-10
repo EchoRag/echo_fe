@@ -46,7 +46,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (browserStorage.isTokenExpired()) {
           console.log('Token expired, attempting to refresh');
           try {
-            // Try to get a new token from Clerk
+            // Try to get a new token from Clerk with echo_default template
             const newToken = await getToken();
             if (newToken) {
               console.log('Successfully refreshed token');
@@ -85,8 +85,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // Update auth state when Clerk auth changes
   useEffect(() => {
     const fetchToken = async () => {
+      if (!isLoaded) return;
+
       if (isSignedIn && clerkUser) {
         try {
+          // Get token with echo_default template for API calls
           const token = await getToken();
           const email = clerkUser.primaryEmailAddress?.emailAddress;
           

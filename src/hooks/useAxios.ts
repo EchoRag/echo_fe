@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { useEffect } from 'react';
-import { useAuthToken } from './useAuthToken';
+import { useAuthContext } from '../context/AuthContext';
+
 const axiosInstance = axios.create({
   baseURL: import.meta.env.VITE_APP_API_URI,
   timeout: 180000,
@@ -39,11 +40,11 @@ const useAxiosInterceptor = (token: string | null) => {
       axiosInstance.interceptors.request.eject(requestInterceptor);
       axiosInstance.interceptors.response.eject(responseInterceptor);
     };
-  }, [token]); // Dependency array includes getToken
+  }, [token]);
 };
 
 const useAxios = () => {
-  const token = useAuthToken();
+  const { token } = useAuthContext();
   useAxiosInterceptor(token);
 
   return axiosInstance;
