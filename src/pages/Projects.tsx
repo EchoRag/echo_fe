@@ -17,7 +17,7 @@ interface Project {
 export default function Projects() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
-  const [editProject, setEditProject] = useState<Project | null>(null); // State for editing project
+  const [editProject, setEditProject] = useState<Project | null>(null);
   const axios = useAxios();
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(
@@ -95,7 +95,6 @@ export default function Projects() {
         },
       });
 
-      // Handle success (e.g., show notification, update UI)
       console.log("File uploaded successfully");
     } catch (error) {
       console.error("Failed to upload file:", error);
@@ -116,6 +115,50 @@ export default function Projects() {
             key={project.id}
             className="relative bg-white border border-gray-200 rounded-lg p-6"
           >
+            {/* Dropdown Menu */}
+            <div className="absolute top-2 right-2">
+              <button
+                className="text-gray-700 bg-gray-200 hover:bg-gray-300 px-2 py-1 rounded-full"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const dropdown = document.getElementById(
+                    `dropdown-${project.id}`
+                  );
+                  dropdown?.classList.toggle("hidden");
+                }}
+              >
+                &#x2026;
+              </button>
+
+              <div
+                id={`dropdown-${project.id}`}
+                className="hidden absolute right-0 mt-2 w-36 bg-white border border-gray-200 rounded-lg shadow-md z-10"
+              >
+                <button
+                  className="block w-full text-left px-4 py-2 text-sm text-white bg-[#2A3365] hover:bg-[#1e2550]"
+                  onClick={() => {
+                    setEditProject(project);
+                    document
+                      .getElementById(`dropdown-${project.id}`)
+                      ?.classList.add("hidden");
+                  }}
+                >
+                  Edit
+                </button>
+                <button
+                  className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                  onClick={() => {
+                    alert(`Delete logic for ${project.name}`);
+                    document
+                      .getElementById(`dropdown-${project.id}`)
+                      ?.classList.add("hidden");
+                  }}
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+
             <div className="flex flex-col gap-2">
               <h5 className="text-2xl font-bold text-gray-900">
                 {project.name}
@@ -124,16 +167,8 @@ export default function Projects() {
                 {project.description}
               </p>
             </div>
-            <div className="flex flex-wrap gap-3 mt-4">
-              {/* Edit Project Button */}
-              <button
-                onClick={() => setEditProject(project)}
-                className="text-white bg-blue-600 hover:bg-blue-700 px-3 py-2 rounded-lg"
-              >
-                Edit
-              </button>
 
-              {/* Upload Documents Button */}
+            <div className="flex flex-wrap gap-3 mt-4">
               <button
                 type="button"
                 className="text-white bg-[#2A3365] hover:bg-blue-800 px-3 py-2 rounded-lg"
@@ -145,7 +180,6 @@ export default function Projects() {
                 Upload Documents
               </button>
 
-              {/* Add Call Button */}
               <button
                 type="button"
                 className="text-white bg-[#2A3365] hover:bg-blue-800 px-3 py-2 rounded-lg"
@@ -153,7 +187,6 @@ export default function Projects() {
                 Add Call
               </button>
 
-              {/* View Details Link */}
               <Link
                 to={`/projects/${project.id}`}
                 className="text-blue-500 hover:underline px-3 py-2"
@@ -202,7 +235,7 @@ export default function Projects() {
         <EditProjectModal
           project={editProject}
           onClose={() => setEditProject(null)}
-          onUpdate={handleUpdateProject} // Pass handleUpdateProject here
+          onUpdate={handleUpdateProject}
         />
       )}
 
