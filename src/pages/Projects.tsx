@@ -4,6 +4,7 @@ import { AddProjectModal } from '../components/AddProjectModal';
 import { UploadFileModal } from '../components/UploadFileModal';
 import useAxios from '../hooks/useAxios'; // Import useAxios
 import { API_PATHS } from '../utils/apiPaths'; // Import API paths
+import { Link } from 'react-router-dom';
 
 interface Project {
   id: string;
@@ -82,9 +83,12 @@ export default function Projects() {
           <div key={project.id} className="relative bg-white border border-gray-200 rounded-lg">
             <div className="flex flex-col items-start p-6 gap-3 w-full h-full">
               <div className="flex flex-col gap-2">
-                <h5 className="text-2xl font-bold text-gray-900 font-inter text-left">
+                <Link 
+                  to={`/projects/${project.id}/documents`}
+                  className="text-2xl font-bold text-gray-900 font-inter text-left hover:text-blue-600"
+                >
                   {project.name}
-                </h5>
+                </Link>
                 <p className="text-base font-normal text-gray-500 font-inter text-left">
                   {project.description}
                 </p>

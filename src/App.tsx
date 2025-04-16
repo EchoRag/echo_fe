@@ -5,6 +5,7 @@ import { SideNav } from './components/SideNav'
 import { Chat } from './components/Chat/Chat'
 import { LoginModal } from './components/LoginModal'
 import Projects from './pages/Projects'
+import ProjectDocuments from './pages/ProjectDocuments'
 import './App.css'
 import { AuthProvider, useAuthContext } from './context/AuthContext';
 import { LoginModalProvider, useLoginModal } from './context/LoginModalContext';
@@ -79,6 +80,7 @@ function App() {
             <Routes>
               <Route path="/" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
               <Route path="/projects" element={<ProtectedRoute><Projects /></ProtectedRoute>} />
+              <Route path="/projects/:projectId" element={<ProtectedRoute><ProjectDocuments /></ProtectedRoute>} />
               <Route path="/calendar" element={<ProtectedRoute><div>Calendar Page (Coming Soon)</div></ProtectedRoute>} />
               <Route path="/tasks" element={<ProtectedRoute><div>Tasks Page (Coming Soon)</div></ProtectedRoute>} />
               <Route path="/settings" element={<ProtectedRoute><div>Settings Page (Coming Soon)</div></ProtectedRoute>} />
