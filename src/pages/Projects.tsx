@@ -73,6 +73,20 @@ export default function Projects() {
     setEditProject(null);
   };
 
+  const handleDeleteProject = async (projectId: string) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this project?"
+    );
+    if (!confirmed) return;
+
+    try {
+      await axios.delete(`${API_PATHS.PROJECTS}/${projectId}`);
+      setProjects(projects.filter((p) => p.id !== projectId));
+    } catch (error) {
+      console.error("Failed to delete project:", error);
+    }
+  };
+
   const handleUploadFile = async (fileData: {
     file: File;
     fileName: string;
@@ -148,7 +162,7 @@ export default function Projects() {
                 <button
                   className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
                   onClick={() => {
-                    alert(`Delete logic for ${project.name}`);
+                    handleDeleteProject(project.id);
                     document
                       .getElementById(`dropdown-${project.id}`)
                       ?.classList.add("hidden");
