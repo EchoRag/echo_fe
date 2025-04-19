@@ -35,9 +35,9 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   }
 
   // If user is not signed in, redirect to home
-  if (!isSignedIn || !user) {
-    return <Navigate to="/" replace />;
-  }
+  // if (!isSignedIn || !user) {
+  //   return <Navigate to="/" replace />;
+  // }
 
   return <>{children}</>;
 };
@@ -45,8 +45,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 function AppLayout({ children }: { children: JSX.Element }) {
   const { user } = useAuthContext();
   const { showLoginModal, closeLoginModal } = useLoginModal();
-  const [isSideNavCollapsed, setIsSideNavCollapsed] = useState(false);
-
+  const [isSideNavCollapsed, setIsSideNavCollapsed] = useState(true);
   return (
     <>
       <div className="flex h-full">

@@ -12,11 +12,13 @@ export interface Message {
   content: string;
   sender: 'user' | 'assistant';
   timestamp: Date;
+  assistant_message_id?: string;
 }
 
 interface ChatResponse {
   response: string;
   conversation_id: string;
+  assistant_message_id?: string;
 }
 
 export function Chat() {
@@ -88,6 +90,7 @@ export function Chat() {
         content: response.data.response,
         sender: 'assistant',
         timestamp: new Date(),
+        assistant_message_id: response.data.assistant_message_id,
       };
       setMessages(prev => [...prev, assistantMessage]);
       

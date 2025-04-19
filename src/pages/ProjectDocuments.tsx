@@ -18,7 +18,7 @@ interface Document {
   description: string | null;
   isCallRecording: boolean;
   isCallTranscript: boolean;
-  status: 'pending' | 'processing' | 'completed' | 'failed';
+  status: 'pending' | 'processing' | 'processed' | 'failed';
   errorDescription: string | null;
   createdAt: string;
   updatedAt: string;
@@ -78,7 +78,7 @@ export default function ProjectDocuments() {
     const statusConfig = {
       pending: { text: 'Pending', className: 'bg-yellow-100 text-yellow-800' },
       processing: { text: 'Processing', className: 'bg-blue-100 text-blue-800' },
-      completed: { text: 'Completed', className: 'bg-green-100 text-green-800' },
+      processed: { text: 'Processed', className: 'bg-green-100 text-green-800' },
       failed: { text: 'Failed', className: 'bg-red-100 text-red-800' }
     };
     return statusConfig[doc.status];
