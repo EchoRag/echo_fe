@@ -77,8 +77,8 @@ function MessageBubble({ message }: { message: Message }) {
         </div>
         <div className="flex items-center justify-between mt-2">
           <p className={`text-xs ${isUser ? 'text-blue-100' : 'text-gray-500'}`}>
-            {new Date(message.timestamp).toLocaleTimeString()}
-          </p>
+          {new Date(message.timestamp).toLocaleTimeString()}
+        </p>
           {!isUser && message.assistant_message_id && (
             <div className="flex items-center space-x-2">
               <button

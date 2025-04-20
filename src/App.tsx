@@ -6,6 +6,7 @@ import { Chat } from './components/Chat/Chat'
 import { LoginModal } from './components/LoginModal'
 import Projects from './pages/Projects'
 import ProjectDocuments from './pages/ProjectDocuments'
+import Status from './pages/Status'
 import './App.css'
 import { AuthProvider, useAuthContext } from './context/AuthContext';
 import { LoginModalProvider, useLoginModal } from './context/LoginModalContext';
@@ -50,7 +51,7 @@ function AppLayout({ children }: { children: JSX.Element }) {
     <>
       <div className="flex h-full">
         {user && (
-          <div className="fixed inset-y-0 left-0">
+          <div className="fixed inset-y-0 left-0 z-30">
             <SideNav onCollapseChange={setIsSideNavCollapsed} />
           </div>
         )}
@@ -80,6 +81,7 @@ function App() {
               <Route path="/" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
               <Route path="/projects" element={<ProtectedRoute><Projects /></ProtectedRoute>} />
               <Route path="/projects/:projectId" element={<ProtectedRoute><ProjectDocuments /></ProtectedRoute>} />
+              <Route path="/status" element={<ProtectedRoute><Status /></ProtectedRoute>} />
               <Route path="/calendar" element={<ProtectedRoute><div>Calendar Page (Coming Soon)</div></ProtectedRoute>} />
               <Route path="/tasks" element={<ProtectedRoute><div>Tasks Page (Coming Soon)</div></ProtectedRoute>} />
               <Route path="/settings" element={<ProtectedRoute><div>Settings Page (Coming Soon)</div></ProtectedRoute>} />

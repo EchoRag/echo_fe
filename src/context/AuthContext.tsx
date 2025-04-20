@@ -57,10 +57,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               console.log('Successfully refreshed JWT');
               const authData = browserStorage.getAuthData();
               if (authData) {
-                browserStorage.setAuthData({
+              browserStorage.setAuthData({
                   ...authData,
                   jwt: newJwt,
-                });
+              });
                 setJwt(newJwt);
               }
               return;
@@ -150,8 +150,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const signOut = async () => {
     try {
       // Clear local storage first
-      browserStorage.clearAuthData();
-      setUser(null);
+    browserStorage.clearAuthData();
+    setUser(null);
       setJwt(null);
       setSessionToken(null);
       
