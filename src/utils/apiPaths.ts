@@ -7,5 +7,7 @@ export const API_PATHS = {
   CHAT_GENERATE: '/generate',
   CONVERSATIONS: `${API_BASE_URL}/conversations`,
   MESSAGE_VOTE: (messageId: string) => `/messages/${messageId}/vote`,
+  NOTIFICATIONS: `${API_BASE_URL}/notifications`,
+  NOTIFICATION_READ: (notificationId: string) => `${API_BASE_URL}/notifications/${notificationId}/read`,
   // Add other paths as needed
 } as const;

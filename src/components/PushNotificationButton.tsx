@@ -17,15 +17,15 @@ const PushNotificationButton: React.FC = () => {
       setIsEnabled(true);
     }
 
-    // Handle incoming messages
-    const unsubscribe = onMessage(messaging, (payload) => {
-      console.log('Message received:', payload);
-      // Handle the message payload here
-    });
+    // // Handle incoming messages
+    // const unsubscribe = onMessage(messaging, (payload) => {
+    //   console.log('Message received:', payload);
+    //   // Handle the message payload here
+    // });
 
-    return () => {
-      unsubscribe();
-    };
+    // return () => {
+    //   unsubscribe();
+    // };
   }, []);
 
   const handleEnableNotifications = async () => {
