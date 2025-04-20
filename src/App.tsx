@@ -50,7 +50,7 @@ function AppLayout({ children }: { children: JSX.Element }) {
     <>
       <div className="flex h-full">
         {user && (
-          <div className="fixed inset-y-0 left-0">
+          <div className="fixed inset-y-0 left-0 z-30">
             <SideNav onCollapseChange={setIsSideNavCollapsed} />
           </div>
         )}

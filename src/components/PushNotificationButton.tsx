@@ -16,16 +16,6 @@ const PushNotificationButton: React.FC = () => {
     if (Notification.permission === 'granted') {
       setIsEnabled(true);
     }
-
-    // // Handle incoming messages
-    // const unsubscribe = onMessage(messaging, (payload) => {
-    //   console.log('Message received:', payload);
-    //   // Handle the message payload here
-    // });
-
-    // return () => {
-    //   unsubscribe();
-    // };
   }, []);
 
   const handleEnableNotifications = async () => {

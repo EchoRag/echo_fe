@@ -1,10 +1,11 @@
 import { Popover } from 'flowbite-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import useAxios from '../hooks/useAxios';
 import { API_PATHS } from '../utils/apiPaths';
 import { messaging } from '../firebase';
 import { onMessage } from 'firebase/messaging';
 import { useNavigate } from 'react-router-dom';
+import { FixedSizeList as List, ListChildComponentProps } from 'react-window';
 
 interface NotificationData {
   link?: string;
@@ -34,34 +35,62 @@ interface Notification {
   receipts: NotificationReceipt[];
 }
 
+interface NotificationResponse {
+  notifications: Notification[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
 interface NotificationPopoverProps {
   children: React.ReactElement;
 }
+
+const ITEM_HEIGHT = 80; // Height of each notification item
+const PAGE_SIZE = 6; // Number of items per page
+const LIST_HEIGHT = 400; // Fixed height for the list
+const LIST_WIDTH = 320; // Fixed width for the list
 
 export function NotificationPopover({ children }: NotificationPopoverProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loadingNotifications, setLoadingNotifications] = useState<Set<string>>(new Set());
+  const [hasMore, setHasMore] = useState(true);
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
   const axios = useAxios();
   const navigate = useNavigate();
 
   const unreadCount = notifications.filter(n => !n.receipts[0]?.isRead).length;
 
+  const fetchNotifications = useCallback(async (pageNum: number) => {
+    try {
+      const response = await axios.get<NotificationResponse>(API_PATHS.NOTIFICATIONS, {
+        params: {
+          page: pageNum,
+          limit: PAGE_SIZE
+        }
+      });
+      const { notifications: newNotifications, total: totalCount } = response.data;
+      setTotal(totalCount);
+      setNotifications(prev => 
+        pageNum === 1 ? newNotifications : [...prev, ...newNotifications]
+      );
+      setHasMore(newNotifications.length === PAGE_SIZE && pageNum * PAGE_SIZE < totalCount);
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+      setNotifications([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [axios]);
+
   useEffect(() => {
-    const fetchNotifications = async () => {
-      try {
-        const response = await axios.get(API_PATHS.NOTIFICATIONS);
-        setNotifications(response.data);
-      } catch (error) {
-        console.error('Error fetching notifications:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+    fetchNotifications(1);
+  }, [fetchNotifications]);
 
-    fetchNotifications();
-
-    // Set up Firebase message handler
+  // Set up Firebase message handler
+  useEffect(() => {
     const unsubscribe = onMessage(messaging, (payload) => {
       console.log('Received foreground message:', payload);
       
@@ -91,13 +120,13 @@ export function NotificationPopover({ children }: NotificationPopoverProps) {
 
       // Add the new notification to the list
       setNotifications(prevNotifications => [newNotification, ...prevNotifications]);
+      setTotal(prev => prev + 1);
     });
 
-    // Clean up the message handler when component unmounts
     return () => {
       unsubscribe();
     };
-  }, [axios]);
+  }, []);
 
   const handleMarkAsRead = async (notificationId: string) => {
     try {
@@ -162,12 +191,97 @@ export function NotificationPopover({ children }: NotificationPopoverProps) {
     }
   };
 
+  const loadMore = () => {
+    if (!isLoading && hasMore) {
+      setPage(prev => prev + 1);
+      fetchNotifications(page + 1);
+    }
+  };
+
+  const NotificationItem = ({ index, style, data }: ListChildComponentProps<Notification[]>) => {
+    const notification = data[index];
+    if (!notification) return null;
+
+    return (
+      <div
+        style={style}
+        className={`px-4 py-2 hover:bg-gray-50 cursor-pointer ${
+          !notification.receipts[0]?.isRead ? 'bg-blue-50' : ''
+        }`}
+        onClick={() => handleNotificationClick(notification)}
+      >
+        <div className="flex justify-between items-start">
+          <div className="flex-1">
+            <div className="flex justify-between">
+              <h4 className="text-sm font-medium text-gray-900">
+                {notification.title}
+              </h4>
+              <span className="text-xs text-gray-500">
+                {formatDate(notification.createdAt)}
+              </span>
+            </div>
+            <p className="mt-1 text-sm text-gray-600">{notification.body}</p>
+          </div>
+          {!notification.receipts[0]?.isRead && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleMarkAsRead(notification.id);
+              }}
+              className="ml-2 p-1 text-gray-400 hover:text-gray-600"
+              title="Mark as read"
+              disabled={loadingNotifications.has(notification.id)}
+            >
+              {loadingNotifications.has(notification.id) ? (
+                <svg
+                  className="animate-spin h-4 w-4 text-gray-400"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  />
+                </svg>
+              ) : (
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+              )}
+            </button>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <Popover
       trigger="click"
       placement="right"
       content={
-        <div className="w-80 max-h-[400px] overflow-y-auto bg-white rounded-lg shadow-lg">
+        <div className="w-80 bg-white rounded-lg shadow-lg">
           <div className="p-3 border-b border-gray-200">
             <div className="flex justify-between items-center">
               <h3 className="text-lg font-semibold text-gray-900">Notifications</h3>
@@ -181,8 +295,8 @@ export function NotificationPopover({ children }: NotificationPopoverProps) {
               )}
             </div>
           </div>
-          <div className="divide-y divide-gray-200">
-            {isLoading ? (
+          <div className="h-[400px]">
+            {isLoading && notifications.length === 0 ? (
               <div className="p-4 text-center text-gray-500">
                 Loading notifications...
               </div>
@@ -191,78 +305,29 @@ export function NotificationPopover({ children }: NotificationPopoverProps) {
                 No new notifications
               </div>
             ) : (
-              notifications.map((notification) => (
-                <div
-                  key={notification.id}
-                  className={`p-4 hover:bg-gray-50 cursor-pointer ${
-                    !notification.receipts[0]?.isRead ? 'bg-blue-50' : ''
-                  }`}
-                  onClick={() => handleNotificationClick(notification)}
-                >
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <div className="flex justify-between">
-                        <h4 className="text-sm font-medium text-gray-900">
-                          {notification.title}
-                        </h4>
-                        <span className="text-xs text-gray-500">
-                          {formatDate(notification.createdAt)}
-                        </span>
+              <List
+                height={LIST_HEIGHT}
+                itemCount={notifications.length + (hasMore ? 1 : 0)}
+                itemSize={ITEM_HEIGHT}
+                width={LIST_WIDTH}
+                itemData={notifications}
+                onItemsRendered={({ visibleStopIndex }) => {
+                  if (visibleStopIndex === notifications.length - 1 && hasMore) {
+                    loadMore();
+                  }
+                }}
+              >
+                {({ index, style, data }) => {
+                  if (index === data.length) {
+                    return (
+                      <div style={style} className="flex justify-center items-center p-4">
+                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900" />
                       </div>
-                      <p className="mt-1 text-sm text-gray-600">{notification.body}</p>
-                    </div>
-                    {!notification.receipts[0]?.isRead && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleMarkAsRead(notification.id);
-                        }}
-                        className="ml-2 p-1 text-gray-400 hover:text-gray-600"
-                        title="Mark as read"
-                        disabled={loadingNotifications.has(notification.id)}
-                      >
-                        {loadingNotifications.has(notification.id) ? (
-                          <svg
-                            className="animate-spin h-4 w-4 text-gray-400"
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                          >
-                            <circle
-                              className="opacity-25"
-                              cx="12"
-                              cy="12"
-                              r="10"
-                              stroke="currentColor"
-                              strokeWidth="4"
-                            />
-                            <path
-                              className="opacity-75"
-                              fill="currentColor"
-                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                            />
-                          </svg>
-                        ) : (
-                          <svg
-                            className="w-4 h-4"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                            xmlns="http://www.w3.org/2000/svg"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M5 13l4 4L19 7"
-                            />
-                          </svg>
-                        )}
-                      </button>
-                    )}
-                  </div>
-                </div>
-              ))
+                    );
+                  }
+                  return <NotificationItem index={index} style={style} data={data} />;
+                }}
+              </List>
             )}
           </div>
         </div>
