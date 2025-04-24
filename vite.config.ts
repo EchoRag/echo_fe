@@ -57,28 +57,28 @@ export default defineConfig({
     // chunkSizeWarningLimit: 1000, // Increase the warning limit to 1000kb
     rollupOptions: {
       output: {
-        manualChunks: {
-          'vendor': [
-            'react',
-            'react-dom',
-            'react-router-dom',
-            'axios',
-            'react-hook-form',
-            'react-markdown',
-            'react-redux',
-            'react-window',
-            '@reduxjs/toolkit'
-          ],
-          'ui': [
-            'flowbite',
-            'flowbite-react',
-            '@clerk/clerk-react',
-          ],
-          'logging': [
-            '@grafana/faro-react',
-            '@grafana/faro-web-sdk',
-          ]
-        }
+        // manualChunks: {
+        //   'vendor': [
+        //     'react',
+        //     'react-dom',
+        //     'react-router-dom',
+        //     'axios',
+        //     'react-hook-form',
+        //     'react-markdown',
+        //     'react-redux',
+        //     'react-window',
+        //     '@reduxjs/toolkit'
+        //   ],
+        //   'ui': [
+        //     'flowbite',
+        //     'flowbite-react',
+        //     '@clerk/clerk-react',
+        //   ],
+        //   'logging': [
+        //     '@grafana/faro-react',
+        //     '@grafana/faro-web-sdk',
+        //   ]
+        // }
       }
     }
   }
