@@ -20,11 +20,10 @@ const userSlice = createSlice({
 });
 
 export const { setUser, clearUser } = userSlice.actions;
-
-export const fetchUser = () => (dispatch) => {
-  const { user, token } = useAuthContext();
-  if (user && token) {
-    dispatch(setUser({ user, token }));
+export const fetchUser = () => (dispatch: any) => {
+  const { user } = useAuthContext();
+  if (user) {
+    dispatch(setUser({ user }));
   } else {
     dispatch(clearUser());
   }

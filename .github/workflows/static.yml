@@ -31,13 +31,30 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v2
+        with:
+          node-version: 20.x
+
+      - name: Install Dependencies
+        run: npm install
+      - name: Setup environment variables
+        run: |
+          echo "$ENV_FILE" >> ./.env
+          cat ./.env
+        env:
+          ENV_FILE: ${{secrets.APP_ENV}}
+      - name: Build React app
+        run: |
+          npm run build
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           # Upload entire repository
-          path: '.'
+          path: './dist'
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4

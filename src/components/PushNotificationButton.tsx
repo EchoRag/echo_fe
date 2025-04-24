@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { messaging } from '../firebase';
 import { Button } from 'flowbite-react';
-import { getToken, onMessage } from 'firebase/messaging';
+import { getToken } from 'firebase/messaging';
 import useAxios from '../hooks/useAxios';
 import { browserStorage } from '../utils/browserStorage';
 

@@ -57,7 +57,7 @@ export function NotificationPopover({ children }: NotificationPopoverProps) {
   const [loadingNotifications, setLoadingNotifications] = useState<Set<string>>(new Set());
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(1);
-  const [total, setTotal] = useState(0);
+  const [_total, setTotal] = useState(0);
   const axios = useAxios();
   const navigate = useNavigate();
 
