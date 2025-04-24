@@ -75,7 +75,7 @@ export function Chat() {
       });
 
       const response = await axios.post<ChatResponse>(
-        `${import.meta.env.VITE_APP_CHAT_API_URI}${API_PATHS.CHAT_GENERATE}`,
+        `${import.meta.env.VITE_APP_API_URI}${API_PATHS.CHAT_GENERATE}`,
         {
           prompt: content,
           model: "llama3.2",

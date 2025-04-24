@@ -4,9 +4,9 @@ export const API_PATHS = {
   PROJECTS: `${API_BASE_URL}/project`,
   PROJECT_DOCUMENTS: (projectId: string) => `${API_BASE_URL}/document/project/${projectId}`,
   UPLOAD_FILE: `${API_BASE_URL}/document`,
-  CHAT_GENERATE: '/generate',
+  CHAT_GENERATE: `${API_BASE_URL}/conversations/generate`,
   CONVERSATIONS: `${API_BASE_URL}/conversations`,
-  MESSAGE_VOTE: (messageId: string) => `/messages/${messageId}/vote`,
+  MESSAGE_VOTE: (messageId: string) => `${API_BASE_URL}/conversations/messages/${messageId}/vote`,
   NOTIFICATIONS: `${API_BASE_URL}/notifications`,
   NOTIFICATION_READ: (notificationId: string) => `${API_BASE_URL}/notifications/${notificationId}/read`,
   // Add other paths as needed
