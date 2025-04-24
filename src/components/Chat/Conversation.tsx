@@ -24,7 +24,7 @@ function MessageBubble({ message }: { message: Message }) {
     if (!message.assistant_message_id) return;
     
     try {
-      await axios.post(`${import.meta.env.VITE_APP_CHAT_API_URI}${API_PATHS.MESSAGE_VOTE(message.assistant_message_id)}`, {
+      await axios.post(`${import.meta.env.VITE_APP_API_URI}${API_PATHS.MESSAGE_VOTE(message.assistant_message_id)}`, {
         vote_type: type
       });
       setFeedback(type);
