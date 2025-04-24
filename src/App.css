@@ -8,7 +8,7 @@
   content:"";
   grid-area: 1/1;
   border-radius: 50%;
-  background: repeating-conic-gradient(#C02942 0 60deg,#0B486B 0 120deg);
+  background: repeating-conic-gradient(#FF6B6B 0 60deg, #4ECDC4 0 120deg);
 }
 .loader:before {
   transform: rotate(0turn) translate(100%) rotate(0turn);
