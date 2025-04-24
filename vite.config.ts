@@ -40,7 +40,7 @@ const firebaseConfigPlugin = {
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: '/echo_fe/',
+  base: '/',
   plugins: [react(), firebaseConfigPlugin],
   resolve: {
     alias: {
