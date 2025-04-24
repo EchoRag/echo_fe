@@ -14,6 +14,24 @@ interface Project {
   status: "active" | "completed" | "on-hold";
 }
 
+const ProjectSkeleton = () => (
+  <div className="bg-white border border-gray-200 rounded-lg p-6 animate-pulse">
+    <div className="absolute top-2 right-2">
+      <div className="w-8 h-8 bg-gray-200 rounded-full"></div>
+    </div>
+    <div className="flex flex-col gap-2">
+      <div className="h-8 bg-gray-200 rounded w-3/4"></div>
+      <div className="h-4 bg-gray-200 rounded w-full"></div>
+      <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+    </div>
+    <div className="flex flex-wrap gap-3 mt-4">
+      <div className="h-10 bg-gray-200 rounded w-32"></div>
+      <div className="h-10 bg-gray-200 rounded w-24"></div>
+      <div className="h-10 bg-gray-200 rounded w-24"></div>
+    </div>
+  </div>
+);
+
 export default function Projects() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -23,6 +41,7 @@ export default function Projects() {
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(
     null
   );
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -31,6 +50,8 @@ export default function Projects() {
         setProjects(response.data);
       } catch (error) {
         console.error("Failed to fetch projects:", error);
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchProjects();
@@ -110,92 +131,100 @@ export default function Projects() {
 
       {/* Projects Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {projects.map((project) => (
-          <div
-            key={project.id}
-            className="relative bg-white border border-gray-200 rounded-lg p-6"
-          >
-            {/* Dropdown Menu */}
-            <div className="absolute top-2 right-2">
-              <button
-                className="text-gray-700 bg-gray-200 hover:bg-gray-300 px-2 py-1 rounded-full"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  const dropdown = document.getElementById(
-                    `dropdown-${project.id}`
-                  );
-                  dropdown?.classList.toggle("hidden");
-                }}
-              >
-                &#x2026;
-              </button>
+        {isLoading ? (
+          // Show skeleton loaders
+          Array.from({ length: 6 }).map((_, index) => (
+            <ProjectSkeleton key={index} />
+          ))
+        ) : (
+          // Show actual projects
+          projects.map((project) => (
+            <div
+              key={project.id}
+              className="relative bg-white border border-gray-200 rounded-lg p-6"
+            >
+              {/* Dropdown Menu */}
+              <div className="absolute top-2 right-2">
+                <button
+                  className="text-gray-700 bg-gray-200 hover:bg-gray-300 px-2 py-1 rounded-full"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const dropdown = document.getElementById(
+                      `dropdown-${project.id}`
+                    );
+                    dropdown?.classList.toggle("hidden");
+                  }}
+                >
+                  &#x2026;
+                </button>
 
-              <div
-                id={`dropdown-${project.id}`}
-                className="hidden absolute right-0 mt-2 w-36 bg-white border border-gray-200 rounded-lg shadow-md z-10"
-              >
+                <div
+                  id={`dropdown-${project.id}`}
+                  className="hidden absolute right-0 mt-2 w-36 bg-white border border-gray-200 rounded-lg shadow-md z-10"
+                >
+                  <button
+                    className="block w-full text-left px-4 py-2 text-sm text-white bg-[#2A3365] hover:bg-[#1e2550]"
+                    onClick={() => {
+                      setEditProject(project);
+                      document
+                        .getElementById(`dropdown-${project.id}`)
+                        ?.classList.add("hidden");
+                    }}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                    onClick={() => {
+                      alert(`Delete logic for ${project.name}`);
+                      document
+                        .getElementById(`dropdown-${project.id}`)
+                        ?.classList.add("hidden");
+                    }}
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <h5 className="text-2xl font-bold text-gray-900">
+                  {project.name}
+                </h5>
+                <p className="text-base font-normal text-gray-500">
+                  {project.description}
+                </p>
+              </div>
+
+              <div className="flex flex-wrap gap-3 mt-4">
                 <button
-                  className="block w-full text-left px-4 py-2 text-sm text-white bg-[#2A3365] hover:bg-[#1e2550]"
+                  type="button"
+                  className="text-white bg-[#2A3365] hover:bg-blue-800 px-3 py-2 rounded-lg"
                   onClick={() => {
-                    setEditProject(project);
-                    document
-                      .getElementById(`dropdown-${project.id}`)
-                      ?.classList.add("hidden");
+                    setSelectedProjectId(project.id);
+                    setShowUploadModal(true);
                   }}
                 >
-                  Edit
+                  Upload Documents
                 </button>
+
                 <button
-                  className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
-                  onClick={() => {
-                    alert(`Delete logic for ${project.name}`);
-                    document
-                      .getElementById(`dropdown-${project.id}`)
-                      ?.classList.add("hidden");
-                  }}
+                  type="button"
+                  className="text-white bg-[#2A3365] hover:bg-blue-800 px-3 py-2 rounded-lg"
                 >
-                  Delete
+                  Add Call
                 </button>
+
+                <Link
+                  to={`/projects/${project.id}`}
+                  className="text-blue-500 hover:underline px-3 py-2"
+                >
+                  View Details
+                </Link>
               </div>
             </div>
-
-            <div className="flex flex-col gap-2">
-              <h5 className="text-2xl font-bold text-gray-900">
-                {project.name}
-              </h5>
-              <p className="text-base font-normal text-gray-500">
-                {project.description}
-              </p>
-            </div>
-
-            <div className="flex flex-wrap gap-3 mt-4">
-              <button
-                type="button"
-                className="text-white bg-[#2A3365] hover:bg-blue-800 px-3 py-2 rounded-lg"
-                onClick={() => {
-                  setSelectedProjectId(project.id);
-                  setShowUploadModal(true);
-                }}
-              >
-                Upload Documents
-              </button>
-
-              <button
-                type="button"
-                className="text-white bg-[#2A3365] hover:bg-blue-800 px-3 py-2 rounded-lg"
-              >
-                Add Call
-              </button>
-
-              <Link
-                to={`/projects/${project.id}`}
-                className="text-blue-500 hover:underline px-3 py-2"
-              >
-                View Details
-              </Link>
-            </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
 
       {/* Add Project Button */}

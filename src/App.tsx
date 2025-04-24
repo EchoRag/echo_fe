@@ -12,6 +12,12 @@ import { AuthProvider, useAuthContext } from './context/AuthContext';
 import { LoginModalProvider, useLoginModal } from './context/LoginModalContext';
 import { useClerk, useAuth } from '@clerk/clerk-react';
 
+const Loader = () => (
+  <div className="flex justify-center items-center h-screen">
+    <div className="loader"></div>
+  </div>
+);
+
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuthContext();
   const { isSignedIn } = useAuth();
@@ -27,12 +33,12 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
   // Show loading state while checking auth
   if (loading || !isClerkLoaded) {
-    return <div>Loading...</div>;
+    return <Loader />;
   }
 
   // If user is signed in with Clerk but not in our context yet, wait
   if (isSignedIn && !user) {
-    return <div>Loading...</div>;
+    return <Loader />;
   }
 
   // If user is not signed in, redirect to home
