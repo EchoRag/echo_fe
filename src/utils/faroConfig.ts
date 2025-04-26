@@ -5,7 +5,7 @@ import { TracingInstrumentation } from '@grafana/faro-web-tracing';
 const faroInstance = initializeFaro({
   url: import.meta.env.VITE_APP_FARO_URL || 'https://localhost:3020',
   app: {
-    name: 'echo-fe',
+    name: import.meta.env.VITE_APP_NAME || 'echo-fe',
     version: '1.0.0',
     environment: import.meta.env.MODE
   },

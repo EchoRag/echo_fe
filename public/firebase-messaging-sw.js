@@ -31,7 +31,12 @@ messaging.onBackgroundMessage((payload) => {
     actions: [
       {
         action: 'open',
-        title: 'Open App'
+        title: 'Open App',
+        onClick: () => {
+          if (payload.data?.url) {
+            clients.openWindow(payload.data.url);
+          }
+        }
       }
     ]
   };

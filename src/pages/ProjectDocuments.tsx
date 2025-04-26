@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { Table, Spinner, Tooltip } from 'flowbite-react';
 import useAxios from '../hooks/useAxios';
 import { API_PATHS } from '../utils/apiPaths';
+import { AnimatedLogo } from '../components/AnimatedLogo';
 
 interface Project {
   id: string;
@@ -86,8 +87,8 @@ export default function ProjectDocuments() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <Spinner size="xl" />
+      <div className="flex justify-center items-center h-full">
+        <AnimatedLogo className="w-full h-full" />
       </div>
     );
   }
