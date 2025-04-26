@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Table, Spinner, Tooltip } from 'flowbite-react';
+import { Table, Tooltip } from 'flowbite-react';
 import useAxios from '../hooks/useAxios';
 import { API_PATHS } from '../utils/apiPaths';
 import { AnimatedLogo } from '../components/AnimatedLogo';

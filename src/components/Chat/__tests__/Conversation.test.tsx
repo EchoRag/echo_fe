@@ -52,7 +52,9 @@ describe('Conversation', () => {
   });
 
   it('renders all messages correctly', () => {
-    render(<Conversation messages={mockMessages} isLoading={false} />);
+    render(<Conversation messages={mockMessages} isLoading={false} onMessageTyped={function (_messageId: string): void {
+      throw new Error('Function not implemented.');
+    } } />);
     
     // Check if all messages are rendered
     expect(screen.getByText('Hello, how can I help you?')).toBeInTheDocument();
@@ -61,7 +63,9 @@ describe('Conversation', () => {
   });
 
   it('renders markdown content correctly', () => {
-    render(<Conversation messages={mockMessages} isLoading={false} />);
+    render(<Conversation messages={mockMessages} isLoading={false} onMessageTyped={function (_messageId: string): void {
+      throw new Error('Function not implemented.');
+    } } />);
     
     // Check if markdown is rendered properly
     const markdownElements = screen.getAllByTestId('mock-markdown');
@@ -69,7 +73,9 @@ describe('Conversation', () => {
   });
 
   it('shows loading indicator when isLoading is true', () => {
-    render(<Conversation messages={mockMessages} isLoading={true} />);
+    render(<Conversation messages={mockMessages} isLoading={true} onMessageTyped={function (_messageId: string): void {
+      throw new Error('Function not implemented.');
+    } } />);
     
     // Check if loading indicator is present
     const loadingContainer = screen.getByTestId('loading-indicator');
@@ -78,7 +84,9 @@ describe('Conversation', () => {
   });
 
   it('does not show loading indicator when isLoading is false', () => {
-    render(<Conversation messages={mockMessages} isLoading={false} />);
+    render(<Conversation messages={mockMessages} isLoading={false} onMessageTyped={function (_messageId: string): void {
+      throw new Error('Function not implemented.');
+    } } />);
     
     // Check that loading indicator is not present
     const loadingIndicator = screen.queryByTestId('loading-indicator');
@@ -86,7 +94,9 @@ describe('Conversation', () => {
   });
 
   it('renders messages with correct styling based on sender', () => {
-    render(<Conversation messages={mockMessages} isLoading={false} />);
+    render(<Conversation messages={mockMessages} isLoading={false} onMessageTyped={function (_messageId: string): void {
+      throw new Error('Function not implemented.');
+    } } />);
     
     // Find all message containers
     const messageContainers = screen.getAllByTestId('message-bubble');
@@ -111,7 +121,9 @@ describe('Conversation', () => {
   });
 
   it('renders timestamps correctly', () => {
-    render(<Conversation messages={mockMessages} isLoading={false} />);
+    render(<Conversation messages={mockMessages} isLoading={false} onMessageTyped={function (_messageId: string): void {
+      throw new Error('Function not implemented.');
+    } } />);
     
     // Check if timestamps are rendered
     const timestamps = screen.getAllByText(/12:00|12:01|12:02/);
@@ -119,7 +131,9 @@ describe('Conversation', () => {
   });
 
   it('handles empty messages array', () => {
-    render(<Conversation messages={[]} isLoading={false} />);
+    render(<Conversation messages={[]} isLoading={false} onMessageTyped={function (_messageId: string): void {
+      throw new Error('Function not implemented.');
+    } } />);
     
     // Check that no messages are rendered
     const messageElements = screen.queryAllByTestId('mock-markdown');
@@ -132,7 +146,9 @@ describe('Conversation', () => {
       displayedText: text,
     }));
 
-    render(<Conversation messages={mockMessages} isLoading={false} />);
+    render(<Conversation messages={mockMessages} isLoading={false} onMessageTyped={function (_messageId: string): void {
+      throw new Error('Function not implemented.');
+    } } />);
     
     // Verify that useTypewriter was called for assistant messages
     expect(mockUseTypewriter).toHaveBeenCalledWith(
@@ -145,7 +161,9 @@ describe('Conversation', () => {
   });
 
   it('calls scrollIntoView when messages change', () => {
-    render(<Conversation messages={mockMessages} isLoading={false} />);
+    render(<Conversation messages={mockMessages} isLoading={false} onMessageTyped={function (_messageId: string): void {
+      throw new Error('Function not implemented.');
+    } } />);
     
     // Verify that scrollIntoView was called
     expect(Element.prototype.scrollIntoView).toHaveBeenCalled();
