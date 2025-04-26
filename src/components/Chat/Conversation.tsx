@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Message } from './Chat';
+import { Message } from '../../pages/Chat';
 import ReactMarkdown from 'react-markdown';
 import { useTypewriter } from '../../hooks/useTypewriter';
 import useAxios from '../../hooks/useAxios';

@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
-import { ChatInput } from './ChatInput';
-import { ActionCards } from './ActionCards';
-import { Conversation } from './Conversation';
-import { useAuthContext } from '../../context/AuthContext';
-import useAxios from '../../hooks/useAxios';
-import { API_PATHS } from '../../utils/apiPaths';
-import { faro } from '../../utils/faroConfig';
-import { AnimatedLogo } from '../AnimatedLogo';
+import { ChatInput } from '../components/Chat/ChatInput';
+import { ActionCards } from '../components/Chat/ActionCards';
+import { Conversation } from '../components/Chat/Conversation';
+import { useAuthContext } from '../context/AuthContext';
+import useAxios from '../hooks/useAxios';
+import { API_PATHS } from '../utils/apiPaths';
+import { faro } from '../utils/faroConfig';
+import { AnimatedLogo } from '../components/AnimatedLogo';
 import { useParams } from 'react-router-dom';
 
 export interface Message {
