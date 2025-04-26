@@ -155,7 +155,10 @@ export function NotificationPopover({ children }: NotificationPopoverProps) {
 
   const handleNotificationClick = (notification: Notification) => {
     if (notification.data.link) {
-      navigate(notification.data.link);
+      // Extract the path from the full URL
+      const url = new URL(notification.data.link);
+      const path = url.pathname;
+      navigate(path);
     }
     if (!notification.receipts[0]?.isRead) {
       handleMarkAsRead(notification.id);

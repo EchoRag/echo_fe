@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { Navigation } from './components/Navigation'
 import { SideNav } from './components/SideNav'
-import { Chat } from './components/Chat/Chat'
+import { Chat } from './pages/Chat'
 import { LoginModal } from './components/LoginModal'
 import Projects from './pages/Projects'
 import ProjectDocuments from './pages/ProjectDocuments'
@@ -11,10 +11,12 @@ import './App.css'
 import { AuthProvider, useAuthContext } from './context/AuthContext';
 import { LoginModalProvider, useLoginModal } from './context/LoginModalContext';
 import { useClerk, useAuth } from '@clerk/clerk-react';
+import { AnimatedLogo } from './components/AnimatedLogo'
 
 const Loader = () => (
   <div className="flex justify-center items-center h-screen">
-    <div className="loader"></div>
+    {/* <div className="loader"></div> */}
+    <AnimatedLogo className="w-full h-full" />
   </div>
 );
 
@@ -79,12 +81,13 @@ function AppLayout({ children }: { children: JSX.Element }) {
 
 function App() {
   return (
-    <Router>
+    <Router basename="/">
       <AuthProvider>
         <LoginModalProvider>
           <AppLayout>
             <Routes>
               <Route path="/" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
+              <Route path="/chat/:conversationId" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
               <Route path="/projects" element={<ProtectedRoute><Projects /></ProtectedRoute>} />
               <Route path="/projects/:projectId" element={<ProtectedRoute><ProjectDocuments /></ProtectedRoute>} />
               <Route path="/status" element={<ProtectedRoute><Status /></ProtectedRoute>} />

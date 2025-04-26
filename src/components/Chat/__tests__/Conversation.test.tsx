@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { Conversation } from '../Conversation';
-import { Message } from '../Chat';
+import { Message } from '../../../pages/Chat';
 
 // Mock scrollIntoView
 Element.prototype.scrollIntoView = jest.fn();

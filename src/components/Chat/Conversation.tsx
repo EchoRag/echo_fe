@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Message } from './Chat';
+import { Message } from '../../pages/Chat';
 import ReactMarkdown from 'react-markdown';
 import { useTypewriter } from '../../hooks/useTypewriter';
 import useAxios from '../../hooks/useAxios';
@@ -8,15 +8,23 @@ import { API_PATHS } from '../../utils/apiPaths';
 interface ConversationProps {
   messages: Message[];
   isLoading: boolean;
+  onMessageTyped: (messageId: string) => void;
 }
 
-function MessageBubble({ message }: { message: Message }) {
+function MessageBubble({ message, onTypingComplete }: { message: Message; onTypingComplete?: () => void }) {
   const isUser = message.sender === 'user';
-  const { displayedText } = useTypewriter({
+  const { displayedText, isTypingComplete } = useTypewriter({
     text: message.content,
-    enabled: !isUser,
+    enabled: !isUser && message.isTyping,
     speed: 20,
   });
+
+  useEffect(() => {
+    if (isTypingComplete && onTypingComplete) {
+      onTypingComplete();
+    }
+  }, [isTypingComplete, onTypingComplete]);
+
   const [feedback, setFeedback] = useState<'like' | 'dislike' | null>(null);
   const axios = useAxios();
   
@@ -30,7 +38,6 @@ function MessageBubble({ message }: { message: Message }) {
       setFeedback(type);
     } catch (error) {
       console.error('Failed to submit feedback:', error);
-      // Optionally show an error message to the user
     }
   };
   
@@ -72,13 +79,13 @@ function MessageBubble({ message }: { message: Message }) {
               ),
             }}
           >
-            {isUser ? message.content : displayedText}
+            {isUser ? message.content : (message.isTyping ? displayedText : message.content)}
           </ReactMarkdown>
         </div>
         <div className="flex items-center justify-between mt-2">
           <p className={`text-xs ${isUser ? 'text-blue-100' : 'text-gray-500'}`}>
-          {new Date(message.timestamp).toLocaleTimeString()}
-        </p>
+            {new Date(message.timestamp).toLocaleTimeString()}
+          </p>
           {!isUser && message.assistant_message_id && (
             <div className="flex items-center space-x-2">
               <button
@@ -111,7 +118,7 @@ function MessageBubble({ message }: { message: Message }) {
   );
 }
 
-export function Conversation({ messages, isLoading }: ConversationProps) {
+export function Conversation({ messages, isLoading, onMessageTyped }: ConversationProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -125,8 +132,12 @@ export function Conversation({ messages, isLoading }: ConversationProps) {
   return (
     <div className="flex-1 overflow-y-auto p-4">
       <div className="max-w-3xl mx-auto">
-        {messages.map((message) => (
-          <MessageBubble key={message.id} message={message} />
+        {messages.map((message, index) => (
+          <MessageBubble 
+            key={message.id} 
+            message={message} 
+            onTypingComplete={index === messages.length - 1 && message.isTyping ? () => onMessageTyped(message.id) : undefined}
+          />
         ))}
         {isLoading && (
           <div className="flex justify-start mb-4">

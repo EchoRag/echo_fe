@@ -6,13 +6,13 @@ interface UseTypewriterProps {
   enabled?: boolean;
 }
 
-export function useTypewriter({ text, speed = 30, enabled = true }: UseTypewriterProps) {
+export function useTypewriter({ text = '', speed = 30, enabled = true }: UseTypewriterProps) {
   const [displayedText, setDisplayedText] = useState('');
   const [isTypingComplete, setIsTypingComplete] = useState(false);
 
   useEffect(() => {
-    if (!enabled) {
-      setDisplayedText(text);
+    if (!enabled || !text) {
+      setDisplayedText(text || '');
       setIsTypingComplete(true);
       return;
     }

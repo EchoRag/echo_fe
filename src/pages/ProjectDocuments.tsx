@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { Table, Spinner, Tooltip } from 'flowbite-react';
 import useAxios from '../hooks/useAxios';
 import { API_PATHS } from '../utils/apiPaths';
+import { AnimatedLogo } from '../components/AnimatedLogo';
 
 interface Project {
   id: string;
@@ -79,6 +80,7 @@ export default function ProjectDocuments() {
       pending: { text: 'Pending', className: 'bg-yellow-100 text-yellow-800' },
       processing: { text: 'Processing', className: 'bg-blue-100 text-blue-800' },
       processed: { text: 'Processed', className: 'bg-green-100 text-green-800' },
+      error: { text: 'Error', className: 'bg-red-100 text-red-800' },
       failed: { text: 'Failed', className: 'bg-red-100 text-red-800' }
     };
     return statusConfig[doc.status];
@@ -86,8 +88,8 @@ export default function ProjectDocuments() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <Spinner size="xl" />
+      <div className="flex justify-center items-center h-full">
+        <AnimatedLogo className="w-full h-full" />
       </div>
     );
   }
