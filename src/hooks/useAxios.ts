@@ -41,7 +41,7 @@ const useAxiosInterceptor = (token: string | null) => {
         if (error.response && error.response.status === 401) {
           console.log('Received 401 error, redirecting to root');
           // Handle unauthorized errors
-          window.location.href = '/';
+          // window.location.href = '/';
         }
         return Promise.reject(error);
       }

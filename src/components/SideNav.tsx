@@ -97,7 +97,7 @@ const bottomNavItems: NavItem[] = [
 ];
 
 export function SideNav({ onCollapseChange }: SideNavProps) {
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(true);
   const location = useLocation();
   const { conversations, loading, error } = useConversations();
 

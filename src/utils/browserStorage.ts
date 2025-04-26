@@ -104,7 +104,7 @@ class BrowserStorage {
     isJwtExpired(): boolean {
         const expiry = this.getItem<number>(BrowserStorage.JWT_EXPIRY_KEY);
         if (!expiry) return true;
-        return Date.now() >= expiry;
+            return Date.now() >= expiry;
     }
 
     getJwtExpiry(): number | null {

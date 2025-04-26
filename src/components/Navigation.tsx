@@ -2,6 +2,7 @@ import { Navbar } from 'flowbite-react';
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import { useAuthContext } from '../context/AuthContext';
+import PushNotificationButton from './PushNotificationButton';
 
 export function Navigation() {
   const { signOut } = useAuthContext();
@@ -36,6 +37,9 @@ export function Navigation() {
         </button>
         {isDropdownOpen && (
           <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50">
+            <div className="px-4 py-2">
+              <PushNotificationButton />
+            </div>
             <button
               onClick={handleLogout}
               className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"

@@ -1,14 +1,22 @@
 import { useState, useEffect } from 'react'
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { Navigation } from './components/Navigation'
 import { SideNav } from './components/SideNav'
 import { Chat } from './components/Chat/Chat'
 import { LoginModal } from './components/LoginModal'
 import Projects from './pages/Projects'
+import ProjectDocuments from './pages/ProjectDocuments'
+import Status from './pages/Status'
 import './App.css'
 import { AuthProvider, useAuthContext } from './context/AuthContext';
 import { LoginModalProvider, useLoginModal } from './context/LoginModalContext';
 import { useClerk, useAuth } from '@clerk/clerk-react';
+
+const Loader = () => (
+  <div className="flex justify-center items-center h-screen">
+    <div className="loader"></div>
+  </div>
+);
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuthContext();
@@ -25,18 +33,18 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
   // Show loading state while checking auth
   if (loading || !isClerkLoaded) {
-    return <div>Loading...</div>;
+    return <Loader />;
   }
 
   // If user is signed in with Clerk but not in our context yet, wait
   if (isSignedIn && !user) {
-    return <div>Loading...</div>;
+    return <Loader />;
   }
 
   // If user is not signed in, redirect to home
-  if (!isSignedIn || !user) {
-    return <Navigate to="/" replace />;
-  }
+  // if (!isSignedIn || !user) {
+  //   return <Navigate to="/" replace />;
+  // }
 
   return <>{children}</>;
 };
@@ -44,13 +52,12 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 function AppLayout({ children }: { children: JSX.Element }) {
   const { user } = useAuthContext();
   const { showLoginModal, closeLoginModal } = useLoginModal();
-  const [isSideNavCollapsed, setIsSideNavCollapsed] = useState(false);
-
+  const [isSideNavCollapsed, setIsSideNavCollapsed] = useState(true);
   return (
     <>
       <div className="flex h-full">
         {user && (
-          <div className="fixed inset-y-0 left-0">
+          <div className="fixed inset-y-0 left-0 z-30">
             <SideNav onCollapseChange={setIsSideNavCollapsed} />
           </div>
         )}
@@ -79,6 +86,8 @@ function App() {
             <Routes>
               <Route path="/" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
               <Route path="/projects" element={<ProtectedRoute><Projects /></ProtectedRoute>} />
+              <Route path="/projects/:projectId" element={<ProtectedRoute><ProjectDocuments /></ProtectedRoute>} />
+              <Route path="/status" element={<ProtectedRoute><Status /></ProtectedRoute>} />
               <Route path="/calendar" element={<ProtectedRoute><div>Calendar Page (Coming Soon)</div></ProtectedRoute>} />
               <Route path="/tasks" element={<ProtectedRoute><div>Tasks Page (Coming Soon)</div></ProtectedRoute>} />
               <Route path="/settings" element={<ProtectedRoute><div>Settings Page (Coming Soon)</div></ProtectedRoute>} />
