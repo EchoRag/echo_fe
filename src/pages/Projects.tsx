@@ -40,20 +40,21 @@ export default function Projects() {
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const fetchProjects = async () => {
+    try {
+      const response = await axios.get(API_PATHS.PROJECTS);
+      setProjects(response.data);
+    } catch (error) {
+      console.error("Failed to fetch projects:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        const response = await axios.get(API_PATHS.PROJECTS);
-        setProjects(response.data);
-      } catch (error) {
-        console.error("Failed to fetch projects:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
     fetchProjects();
   }, [axios]);
+
 
   const handleAddProject = async (newProject: { name: string; description: string }) => {
     try {
@@ -88,7 +89,7 @@ export default function Projects() {
 
     try {
       await axios.delete(`${API_PATHS.PROJECTS}/${projectId}`);
-      setProjects(projects.filter((p) => p.id !== projectId));
+      await fetchProjects(); //re-fetch the updated project list
     } catch (error) {
       console.error("Failed to delete project:", error);
     }
@@ -132,10 +133,12 @@ export default function Projects() {
       {/* Projects Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {isLoading ? (
+// Show skeleton loaders
           Array.from({ length: 6 }).map((_, index) => (
             <ProjectSkeleton key={index} />
           ))
         ) : (
+      //Show actual projects
           projects.map((project) => (
             <div
               key={project.id}
@@ -249,14 +252,15 @@ export default function Projects() {
           Add Project
         </Button>
       </div>
-
+      
+{/* Add Project Modal */}
       {/* Modals */}
       <AddProjectModal
         show={showAddModal}
         onClose={() => setShowAddModal(false)}
         onAddProject={handleAddProject}
       />
-
+{/* Edit Project Modal */}
       {editProject && (
         <EditProjectModal
           project={editProject}
@@ -264,7 +268,7 @@ export default function Projects() {
           onUpdate={handleUpdateProject}
         />
       )}
-
+{/* Upload File Modal */}
       <UploadFileModal
         show={showUploadModal}
         onClose={() => {
@@ -276,3 +280,4 @@ export default function Projects() {
     </div>
   );
 }
+
