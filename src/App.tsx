@@ -12,6 +12,8 @@ import { AuthProvider, useAuthContext } from './context/AuthContext';
 import { LoginModalProvider, useLoginModal } from './context/LoginModalContext';
 import { useClerk, useAuth } from '@clerk/clerk-react';
 import { AnimatedLogo } from './components/AnimatedLogo'
+import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
+const SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
 
 const Loader = () => (
   <div className="flex justify-center items-center h-screen">
@@ -69,7 +71,7 @@ function AppLayout({ children }: { children: JSX.Element }) {
               <Navigation />
             </div>
           )}
-          <main className={`container mx-auto px-4 py-8 ${user ? 'mt-16' : ''} overflow-y-auto`}>
+          <main className={`container mx-auto px-4 py-8 ${user ? 'mt-16' : ''} overflow-y-auto h-full`}>
             {children}
           </main>
         </div>
@@ -79,26 +81,55 @@ function AppLayout({ children }: { children: JSX.Element }) {
   );
 }
 
+const AppRoutes = () => {
+  return (
+    <AppLayout>
+      <Routes>
+        <Route path="/" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
+        <Route path="/chat/:conversationId" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
+        <Route path="/projects" element={<ProtectedRoute><Projects /></ProtectedRoute>} />
+        <Route path="/projects/:projectId" element={<ProtectedRoute><ProjectDocuments /></ProtectedRoute>} />
+        <Route path="/status" element={<ProtectedRoute><Status /></ProtectedRoute>} />
+        <Route path="/calendar" element={<ProtectedRoute><div>Calendar Page (Coming Soon)</div></ProtectedRoute>} />
+        <Route path="/tasks" element={<ProtectedRoute><div>Tasks Page (Coming Soon)</div></ProtectedRoute>} />
+        <Route path="/settings" element={<ProtectedRoute><div>Settings Page (Coming Soon)</div></ProtectedRoute>} />
+      </Routes>
+    </AppLayout>
+  );
+};
+
 function App() {
   return (
-    <Router>
-      <AuthProvider>
-        <LoginModalProvider>
-          <AppLayout>
-            <Routes>
-              <Route path="/" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
-              <Route path="/chat/:conversationId" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
-              <Route path="/projects" element={<ProtectedRoute><Projects /></ProtectedRoute>} />
-              <Route path="/projects/:projectId" element={<ProtectedRoute><ProjectDocuments /></ProtectedRoute>} />
-              <Route path="/status" element={<ProtectedRoute><Status /></ProtectedRoute>} />
-              <Route path="/calendar" element={<ProtectedRoute><div>Calendar Page (Coming Soon)</div></ProtectedRoute>} />
-              <Route path="/tasks" element={<ProtectedRoute><div>Tasks Page (Coming Soon)</div></ProtectedRoute>} />
-              <Route path="/settings" element={<ProtectedRoute><div>Settings Page (Coming Soon)</div></ProtectedRoute>} />
-            </Routes>
-          </AppLayout>
-        </LoginModalProvider>
-      </AuthProvider>
-    </Router>
+    <div className="app">
+      {SITE_KEY ? (
+        <GoogleReCaptchaProvider
+          reCaptchaKey={SITE_KEY}
+          scriptProps={{
+            async: true,
+            defer: true,
+          }}
+        >
+          <Router>
+            <AuthProvider>
+              <LoginModalProvider>
+                  <AppRoutes />
+              </LoginModalProvider>
+            </AuthProvider>
+          </Router>
+        </GoogleReCaptchaProvider>
+      ) : (
+        <>
+          {/* "Google reCAPTCHA SITE_KEY is not set." */}
+          <Router>
+            <AuthProvider>
+              <LoginModalProvider>
+                  <AppRoutes />
+              </LoginModalProvider>
+            </AuthProvider>
+          </Router>
+        </>
+      )}
+    </div>
   )
 }
 

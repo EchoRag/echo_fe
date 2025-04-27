@@ -9,5 +9,15 @@ export const API_PATHS = {
   MESSAGE_VOTE: (messageId: string) => `${API_BASE_URL}/conversations/messages/${messageId}/vote`,
   NOTIFICATIONS: `${API_BASE_URL}/notifications`,
   NOTIFICATION_READ: (notificationId: string) => `${API_BASE_URL}/notifications/${notificationId}/read`,
+  RECAPTCHA: {
+    ASSESS: `${API_BASE_URL}/recaptcha/assess`,
+  },
+  PROXY_SERVER: {
+    START: `${API_BASE_URL}/proxy-server/start`,
+  },
   // Add other paths as needed
 } as const;
+
+export const getApiPath = (path: keyof typeof API_PATHS) => {
+  return API_PATHS[path];
+};
