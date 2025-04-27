@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { HashRouter as Router, Routes, Route } from 'react-router-dom'
 import { Navigation } from './components/Navigation'
 import { SideNav } from './components/SideNav'
 import { Chat } from './pages/Chat'
@@ -81,7 +81,7 @@ function AppLayout({ children }: { children: JSX.Element }) {
 
 function App() {
   return (
-    <Router basename="/">
+    <Router>
       <AuthProvider>
         <LoginModalProvider>
           <AppLayout>

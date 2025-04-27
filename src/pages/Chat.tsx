@@ -7,7 +7,7 @@ import useAxios from '../hooks/useAxios';
 import { API_PATHS } from '../utils/apiPaths';
 import { faro } from '../utils/faroConfig';
 import { AnimatedLogo } from '../components/AnimatedLogo';
-import { useParams } from 'react-router-dom';
+import { useParams, useLocation, useNavigate } from 'react-router-dom';
 
 export interface Message {
   id: string;
@@ -35,6 +35,20 @@ export function Chat() {
   const { user } = useAuthContext();
   const axios = useAxios();
   const { conversationId: urlConversationId } = useParams();
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // Clear parameters when on root route
+  useEffect(() => {
+    if (location.pathname === '/') {
+      // Clear URL parameters
+      window.history.replaceState({}, '', '/');
+      // Reset state
+      setMessages([]);
+      setConversationId(null);
+      setError(null);
+    }
+  }, [location.pathname]);
 
   // Reset state when URL changes
   useEffect(() => {
@@ -79,14 +93,13 @@ export function Chat() {
   // Update URL when conversation ID changes
   useEffect(() => {
     if (conversationId) {
-      const url = new URL(window.location.href);
-      url.searchParams.set('conversation_id', conversationId);
-      window.history.pushState({}, '', url.toString());
+      // Use navigate to update the URL with hash routing
+      navigate(`/chat/${conversationId}`, { replace: true });
       faro.pushEvent('conversation_id_updated', {
         conversation_id: conversationId,
       });
     }
-  }, [conversationId]);
+  }, [conversationId, navigate]);
 
   const handleSendMessage = async (content: string) => {
     if (!content.trim()) return;
