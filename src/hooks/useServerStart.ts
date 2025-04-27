@@ -14,7 +14,7 @@ export const useServerStart = () => {
 
     try {
       // Execute reCAPTCHA and get token
-      const token = await executeRecaptcha('start-server');
+      const token = await executeRecaptcha('start_server');
       
       // Send token to backend for assessment
       const response = await axios.post(API_PATHS.PROXY_SERVER.START, null, {
