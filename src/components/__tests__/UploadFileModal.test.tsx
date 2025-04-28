@@ -1,5 +1,14 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { UploadFileModal } from '../UploadFileModal';
+// Mock Faro configuration
+jest.mock('../../utils/faroConfig', () => ({
+  faro: {
+    api: {
+      getOTEL: () => null,
+      pushEvent: jest.fn(),
+    },
+  },
+}));
 
 describe('UploadFileModal', () => {
   const mockOnClose = jest.fn();

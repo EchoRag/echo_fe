@@ -3,6 +3,16 @@ import userEvent from '@testing-library/user-event';
 import useAxios from '../../hooks/useAxios';
 import { AddProjectModal } from '../AddProjectModal';
 
+// Mock Faro configuration
+jest.mock('../../utils/faroConfig', () => ({
+  faro: {
+    api: {
+      getOTEL: () => null,
+      pushEvent: jest.fn(),
+    },
+  },
+}));
+
 jest.mock('../../hooks/useAxios');
 describe('AddProjectModal', () => {
   const mockOnClose = jest.fn();

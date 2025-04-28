@@ -5,6 +5,14 @@ import { Message } from '../../../pages/Chat';
 // Mock scrollIntoView
 Element.prototype.scrollIntoView = jest.fn();
 
+jest.mock('../../../utils/faroConfig', () => ({
+  faro: {
+    api: {
+      getOTEL: () => null,
+      pushEvent: jest.fn()
+    }
+  }
+}));
 // Mock react-markdown
 jest.mock('react-markdown', () => {
   return function MockReactMarkdown({ children }: { children: string }) {
@@ -32,18 +40,21 @@ describe('Conversation', () => {
       content: 'Hello, how can I help you?',
       sender: 'assistant',
       timestamp: new Date('2024-01-01T12:00:00'),
+      isTyping: true
     },
     {
       id: '2',
       content: 'I need help with my code',
       sender: 'user',
       timestamp: new Date('2024-01-01T12:01:00'),
+      isTyping: false
     },
     {
       id: '3',
       content: 'Here is some **markdown** and `code`',
       sender: 'assistant',
       timestamp: new Date('2024-01-01T12:02:00'),
+      isTyping: true
     },
   ];
 
@@ -142,18 +153,37 @@ describe('Conversation', () => {
 
   it('applies typewriter effect to assistant messages', () => {
     const mockUseTypewriter = jest.requireMock('../../../hooks/useTypewriter').useTypewriter;
-    mockUseTypewriter.mockImplementation(({ text }: TypewriterProps) => ({
+    mockUseTypewriter.mockImplementation(({ text, enabled }: TypewriterProps) => ({
       displayedText: text,
+      isTypingComplete: false
     }));
 
     render(<Conversation messages={mockMessages} isLoading={false} onMessageTyped={function (_messageId: string): void {
       throw new Error('Function not implemented.');
     } } />);
     
-    // Verify that useTypewriter was called for assistant messages
+    // Verify that useTypewriter was called for assistant messages with enabled=true
     expect(mockUseTypewriter).toHaveBeenCalledWith(
       expect.objectContaining({
         text: 'Hello, how can I help you?',
+        enabled: true,
+        speed: 20,
+      })
+    );
+
+    // Verify that useTypewriter was called for user messages with enabled=false
+    expect(mockUseTypewriter).toHaveBeenCalledWith(
+      expect.objectContaining({
+        text: 'I need help with my code',
+        enabled: false,
+        speed: 20,
+      })
+    );
+
+    // Verify that useTypewriter was called for assistant messages with enabled=true
+    expect(mockUseTypewriter).toHaveBeenCalledWith(
+      expect.objectContaining({
+        text: 'Here is some **markdown** and `code`',
         enabled: true,
         speed: 20,
       })

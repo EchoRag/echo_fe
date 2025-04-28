@@ -11,7 +11,7 @@ jest.mock('@clerk/clerk-react', () => ({
 }));
 
 // Mock browserStorage
-jest.mock('../utils/browserStorage', () => ({
+jest.mock('../../utils/browserStorage', () => ({
   browserStorage: {
     getAuthData: jest.fn(),
     setAuthData: jest.fn(),

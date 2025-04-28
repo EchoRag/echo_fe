@@ -2,6 +2,30 @@ import { render, screen } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { Navigation } from '../Navigation';
 
+// Mock Faro
+jest.mock('../../utils/faroConfig', () => ({
+  faro: {
+    api: {
+      getOTEL: () => null,
+      pushEvent: jest.fn()
+    }
+  }
+}));
+
+// Mock Firebase
+jest.mock('../../firebase', () => ({
+  messaging: {
+    // Mock any methods you need from messaging
+  }
+}));
+
+// Mock useAuthContext
+jest.mock('../../context/AuthContext', () => ({
+  useAuthContext: () => ({
+    signOut: jest.fn()
+  })
+}));
+
 // Mock useLocation hook
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -56,7 +80,6 @@ describe('Navigation', () => {
     expect(userIcon).toBeInTheDocument();
     expect(userIcon).toHaveClass('w-6', 'h-6', 'text-white');
   });
-
 
   it('has correct link to home page', () => {
     renderNavigation();

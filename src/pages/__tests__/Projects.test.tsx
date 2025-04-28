@@ -1,7 +1,19 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import Projects from '../Projects';
 import userEvent from '@testing-library/user-event';
 import useAxios from '../../hooks/useAxios';
+import { BrowserRouter } from 'react-router-dom';
+import { act } from 'react';
+
+// Mock Faro configuration
+jest.mock('../../utils/faroConfig', () => ({
+  faro: {
+    api: {
+      getOTEL: () => null,
+      pushEvent: jest.fn(),
+    },
+  },
+}));
 
 // Mock axios
 jest.mock('../../hooks/useAxios');
@@ -46,27 +58,43 @@ const mockProjects = [
 ];
 
 describe('Projects', () => {
+  const mockAxios = {
+    get: jest.fn(),
+    post: jest.fn(),
+    put: jest.fn()
+  };
+
   beforeEach(() => {
-    // Mock API response
-    let mockAxios: jest.Mock = jest.fn().mockResolvedValueOnce({
-      data: mockProjects
-    });
-    (useAxios as jest.Mock).mockReturnValue({ get: mockAxios });
-
-    render(<Projects />);
-  });
-
-  afterEach(() => {
+    // Reset mocks
     jest.clearAllMocks();
+    mockAxios.get.mockResolvedValue({ data: mockProjects });
+    (useAxios as jest.Mock).mockReturnValue(mockAxios);
   });
 
-  it('renders the projects page title', () => {
+  const renderWithRouter = (component: React.ReactElement) => {
+    return render(
+      <BrowserRouter>
+        {component}
+      </BrowserRouter>
+    );
+  };
+
+  it('renders loading state initially', () => {
+    renderWithRouter(<Projects />);
+    const skeletons = document.querySelectorAll('.animate-pulse');
+    expect(skeletons).toHaveLength(6); // Default number of skeleton loaders
+  });
+
+  it('renders the projects page title', async () => {
+    renderWithRouter(<Projects />);
     const heading = screen.getByRole('heading', { level: 1 });
     expect(heading).toHaveTextContent('Projects');
     expect(heading).toHaveClass('text-gray-900');
   });
 
-  it('renders all project cards', async () => {
+  it('renders all project cards after loading', async () => {
+    renderWithRouter(<Projects />);
+
     // Wait for projects to load
     await waitFor(() => {
       expect(screen.getByText(mockProjects[0].name)).toBeInTheDocument();
@@ -75,30 +103,33 @@ describe('Projects', () => {
     // Check if all project names are rendered
     mockProjects.forEach(project => {
       expect(screen.getByText(project.name)).toBeInTheDocument();
-    });
-
-    // Check if all project descriptions are rendered
-    mockProjects.forEach(project => {
       expect(screen.getByText(project.description)).toBeInTheDocument();
     });
   });
 
   it('renders action buttons for each project', async () => {
+    renderWithRouter(<Projects />);
+
     await waitFor(() => {
       expect(screen.getByText(mockProjects[0].name)).toBeInTheDocument();
     });
+
     const uploadButtons = screen.getAllByText('Upload Documents');
     const callButtons = screen.getAllByText('Add Call');
+    const viewDetailsLinks = screen.getAllByText('View Details');
 
-    // Should have one button of each type per project
     expect(uploadButtons).toHaveLength(mockProjects.length);
     expect(callButtons).toHaveLength(mockProjects.length);
+    expect(viewDetailsLinks).toHaveLength(mockProjects.length);
   });
 
   it('renders buttons with correct styling', async () => {
+    renderWithRouter(<Projects />);
+
     await waitFor(() => {
       expect(screen.getByText(mockProjects[0].name)).toBeInTheDocument();
     });
+
     const buttons = screen.getAllByRole('button', { name: /upload documents|add call/i });
     buttons.forEach(button => {
       expect(button).toHaveClass('text-white', 'bg-[#2A3365]', 'hover:bg-blue-800');
@@ -106,48 +137,70 @@ describe('Projects', () => {
   });
 
   it('renders Add Project button at the center of the page', async () => {
+    renderWithRouter(<Projects />);
+
     await waitFor(() => {
       expect(screen.getByText(mockProjects[0].name)).toBeInTheDocument();
     });
-    const addButton = screen.getByTestId('add-project-button');
+
+    const addButton = screen.getByRole('button', { name: /add project/i });
     expect(addButton).toBeInTheDocument();
     expect(addButton).toHaveTextContent('Add Project');
     expect(addButton.parentElement).toHaveClass('flex', 'justify-center');
   });
 
-  it('opens a modal when Add Project button is clicked', async () => {
-    const addButton = screen.getByTestId('add-project-button');
+  it('opens Add Project modal when button is clicked', async () => {
+    const user = userEvent.setup();
+    renderWithRouter(<Projects />);
 
-    // Modal should not be visible initially
-    expect(screen.queryByText('Add New Project')).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText(mockProjects[0].name)).toBeInTheDocument();
+    });
 
-    // Click the button
-    fireEvent.click(addButton);
+    const addButton = screen.getByRole('button', { name: /add project/i });
+    await user.click(addButton);
 
-    // Now the modal should be visible
     expect(screen.getByText('Add New Project')).toBeInTheDocument();
     expect(screen.getByTestId('project-name-input')).toBeInTheDocument();
     expect(screen.getByTestId('project-description-input')).toBeInTheDocument();
   });
 
-
-  it('closes the modal when Cancel button is clicked', async () => {
+  it('closes Add Project modal when Cancel button is clicked', async () => {
     const user = userEvent.setup();
-    const addButton = screen.getByTestId('add-project-button');
+    renderWithRouter(<Projects />);
 
-    // Open the modal
+    await waitFor(() => {
+      expect(screen.getByText(mockProjects[0].name)).toBeInTheDocument();
+    });
+
+    // Open modal
+    const addButton = screen.getByRole('button', { name: /add project/i });
     await user.click(addButton);
 
-    // Modal should be visible
-    expect(screen.getByText('Add New Project')).toBeInTheDocument();
-
-    // Click the Cancel button
+    // Close modal
     const cancelButton = screen.getByRole('button', { name: /cancel/i });
     await user.click(cancelButton);
 
-    // Modal should close
     await waitFor(() => {
       expect(screen.queryByText('Add New Project')).not.toBeInTheDocument();
     });
+  });
+
+
+  it('opens Upload File modal when upload button is clicked', async () => {
+    const user = userEvent.setup();
+    renderWithRouter(<Projects />);
+
+    await waitFor(() => {
+      expect(screen.getByText(mockProjects[0].name)).toBeInTheDocument();
+    });
+
+    // Click upload button
+    const uploadButton = screen.getAllByText('Upload Documents')[0];
+    await user.click(uploadButton);
+
+    // Verify modal is open
+    expect(screen.getByText('Upload File')).toBeInTheDocument();
+    expect(screen.getByTestId('file-input')).toBeInTheDocument();
   });
 });
