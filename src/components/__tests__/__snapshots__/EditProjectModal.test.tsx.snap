@@ -1,0 +1,43 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`EditProjectModal matches snapshot 1`] = `
+<div>
+  <div
+    class="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center"
+  >
+    <div
+      class="bg-white p-6 rounded-lg shadow-lg"
+    >
+      <h2
+        class="text-lg font-semibold"
+      >
+        Edit Project
+      </h2>
+      <input
+        class="border p-2 w-full my-2 text-gray-900"
+        type="text"
+        value="Test Project"
+      />
+      <textarea
+        class="border p-2 w-full my-2 text-gray-900"
+      >
+        Test Description
+      </textarea>
+      <div
+        class="flex justify-end gap-3"
+      >
+        <button
+          class="px-4 py-2 bg-gray-400 rounded"
+        >
+          Cancel
+        </button>
+        <button
+          class="px-4 py-2 bg-blue-600 text-white rounded"
+        >
+          Save
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+`;
