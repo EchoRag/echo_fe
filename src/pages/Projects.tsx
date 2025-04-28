@@ -88,10 +88,18 @@ export default function Projects() {
     if (!confirmed) return;
 
     try {
+      // Delete the associated files from cloud storage
+      await axios.delete(`${API_PATHS.PROJECTS}/${projectId}/delete-files`);
+      console.log(`Files for project ${projectId} deleted from cloud storage`);
+
+      // Delete the project from the database
       await axios.delete(`${API_PATHS.PROJECTS}/${projectId}`);
-      await fetchProjects(); //re-fetch the updated project list
+      console.log(`Project ${projectId} deleted from database`);
+
+      // Re-fetch projects after deletion
+      await fetchProjects();
     } catch (error) {
-      console.error("Failed to delete project:", error);
+      console.error("Failed to delete project or files:", error);
     }
   };
 
@@ -280,4 +288,3 @@ export default function Projects() {
     </div>
   );
 }
-
