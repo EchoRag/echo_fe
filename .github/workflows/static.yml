@@ -91,7 +91,7 @@ jobs:
           gh release create "$tag" \
               --repo="$GITHUB_REPOSITORY" \
               --generate-notes \
-              --prerelease 
+              --prerelease --latest
 
       - name: Notify Completion
         run: echo "Pre-release ${{ steps.get_version.outputs.version }} created successfully."

@@ -1,7 +1,7 @@
 {
   "name": "echo_fe",
   "private": true,
-  "version": "0.0.4",
+  "version": "0.0.5",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -23,6 +23,7 @@
     "flowbite-react": "^0.7.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-ga4": "^2.1.0",
     "react-google-recaptcha-v3": "^1.10.1",
     "react-hook-form": "^7.54.2",
     "react-markdown": "^10.1.0",

@@ -4,11 +4,17 @@ import { ClerkProvider } from '@clerk/clerk-react'
 import App from './App.tsx'
 import './index.css'
 import './utils/faroConfig'
+import { initGA } from './utils/analytics'
 
 const CLERK_PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
+const GA_MEASUREMENT_ID = import.meta.env.VITE_MEASURMENT_ID
 
 if (!CLERK_PUBLISHABLE_KEY) {
   throw new Error("Missing Clerk Publishable Key")
+}
+
+if (!GA_MEASUREMENT_ID) {
+  throw new Error("Missing GA4 Measurement ID")
 }
 
 // Register service worker
@@ -23,6 +29,9 @@ if ('serviceWorker' in navigator) {
       });
   });
 }
+
+// Initialize GA4 with measurement ID from environment variable
+initGA(GA_MEASUREMENT_ID);
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
