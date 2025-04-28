@@ -38,29 +38,25 @@ export default function Projects() {
   const [editProject, setEditProject] = useState<Project | null>(null);
   const axios = useAxios();
   const [showUploadModal, setShowUploadModal] = useState(false);
-  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(
-    null
-  );
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const fetchProjects = async () => {
+    try {
+      const response = await axios.get(API_PATHS.PROJECTS);
+      setProjects(response.data);
+    } catch (error) {
+      console.error("Failed to fetch projects:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        const response = await axios.get(API_PATHS.PROJECTS);
-        setProjects(response.data);
-      } catch (error) {
-        console.error("Failed to fetch projects:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
     fetchProjects();
   }, [axios]);
 
-  const handleAddProject = async (newProject: {
-    name: string;
-    description: string;
-  }) => {
+
+  const handleAddProject = async (newProject: { name: string; description: string }) => {
     try {
       const response = await axios.post(API_PATHS.PROJECTS, {
         ...newProject,
@@ -73,16 +69,9 @@ export default function Projects() {
     setShowAddModal(false);
   };
 
-  const handleUpdateProject = async (updatedProject: {
-    id: string;
-    name: string;
-    description: string;
-  }) => {
+  const handleUpdateProject = async (updatedProject: { id: string; name: string; description: string }) => {
     try {
-      await axios.put(
-        `${API_PATHS.PROJECTS}/${updatedProject.id}`,
-        updatedProject
-      );
+      await axios.put(`${API_PATHS.PROJECTS}/${updatedProject.id}`, updatedProject);
       setProjects(
         projects.map((p) =>
           p.id === updatedProject.id ? { ...p, ...updatedProject } : p
@@ -92,6 +81,26 @@ export default function Projects() {
       console.error("Failed to update project:", error);
     }
     setEditProject(null);
+  };
+
+  const handleDeleteProject = async (projectId: string) => {
+    const confirmed = window.confirm("Are you sure you want to delete this project?");
+    if (!confirmed) return;
+
+    try {
+      // Delete the associated files from cloud storage
+      await axios.delete(`${API_PATHS.PROJECTS}/${projectId}/delete-files`);
+      console.log(`Files for project ${projectId} deleted from cloud storage`);
+
+      // Delete the project from the database
+      await axios.delete(`${API_PATHS.PROJECTS}/${projectId}`);
+      console.log(`Project ${projectId} deleted from database`);
+
+      // Re-fetch projects after deletion
+      await fetchProjects();
+    } catch (error) {
+      console.error("Failed to delete project or files:", error);
+    }
   };
 
   const handleUploadFile = async (fileData: {
@@ -132,12 +141,12 @@ export default function Projects() {
       {/* Projects Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {isLoading ? (
-          // Show skeleton loaders
+// Show skeleton loaders
           Array.from({ length: 6 }).map((_, index) => (
             <ProjectSkeleton key={index} />
           ))
         ) : (
-          // Show actual projects
+      //Show actual projects
           projects.map((project) => (
             <div
               key={project.id}
@@ -176,7 +185,7 @@ export default function Projects() {
                   <button
                     className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
                     onClick={() => {
-                      alert(`Delete logic for ${project.name}`);
+                      handleDeleteProject(project.id);
                       document
                         .getElementById(`dropdown-${project.id}`)
                         ?.classList.add("hidden");
@@ -251,15 +260,15 @@ export default function Projects() {
           Add Project
         </Button>
       </div>
-
-      {/* Add Project Modal */}
+      
+{/* Add Project Modal */}
+      {/* Modals */}
       <AddProjectModal
         show={showAddModal}
         onClose={() => setShowAddModal(false)}
         onAddProject={handleAddProject}
       />
-
-      {/* Edit Project Modal */}
+{/* Edit Project Modal */}
       {editProject && (
         <EditProjectModal
           project={editProject}
@@ -267,8 +276,7 @@ export default function Projects() {
           onUpdate={handleUpdateProject}
         />
       )}
-
-      {/* Upload File Modal */}
+{/* Upload File Modal */}
       <UploadFileModal
         show={showUploadModal}
         onClose={() => {
