@@ -1,19 +1,26 @@
 import axios from 'axios';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useAuthContext } from '../context/AuthContext';
 import { faro } from '../utils/faroConfig';
 
-const axiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_APP_API_URI,
-  timeout: 180000,
-});
+const useAxios = () => {
+  const { jwt } = useAuthContext();
+  
+  // Create axios instance inside the hook
+  const axiosInstance = useMemo(() => {
+    const baseURL = import.meta.env.VITE_APP_API_URI || 'http://localhost:3000';
+    return axios.create({
+      baseURL,
+      timeout: 180000,
+    });
+  }, []);
 
-const useAxiosInterceptor = (token: string | null) => {
   useEffect(() => {
     const requestInterceptor = axiosInstance.interceptors.request.use(
       async (config) => {
-        if (token) {
-          config.headers.Authorization = `Bearer ${token}`;
+        if (jwt) {
+          config.headers = config.headers || {};
+          config.headers.Authorization = `Bearer ${jwt}`;
         }
         
         // Add Faro trace ID to headers
@@ -21,6 +28,7 @@ const useAxiosInterceptor = (token: string | null) => {
         if (otel) {
           const span = otel.trace.getTracer('http-request').startSpan('http-request');
           if (span) {
+            config.headers = config.headers || {};
             config.headers['X-Trace-Id'] = span.spanContext().traceId;
             span.end();
           }
@@ -52,12 +60,7 @@ const useAxiosInterceptor = (token: string | null) => {
       axiosInstance.interceptors.request.eject(requestInterceptor);
       axiosInstance.interceptors.response.eject(responseInterceptor);
     };
-  }, [token]);
-};
-
-const useAxios = () => {
-  const { jwt } = useAuthContext();
-  useAxiosInterceptor(jwt);
+  }, [jwt, axiosInstance]);
 
   return axiosInstance;
 }
