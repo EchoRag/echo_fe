@@ -42,7 +42,8 @@ const config: Config.InitialOptions = {
   testEnvironmentOptions: {
     customExportConditions: ['node', 'node-addons'],
   },
-  collectCoverage: true,
+  coverageDirectory: 'coverage',
+  coverageReporters: ['text', 'cobertura']
 };
 
 export default config;

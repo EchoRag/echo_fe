@@ -217,4 +217,53 @@ describe('Status', () => {
       expect(dashboardLink).toHaveAttribute('rel', 'noopener noreferrer');
     });
   });
+
+  it('displays last checked timestamp', async () => {
+    mockAxios.get.mockResolvedValueOnce({ data: mockHealthResponse });
+
+    render(<Status />);
+
+    await waitFor(() => {
+      const lastChecked = screen.getByTestId('last-checked');
+      expect(lastChecked).toHaveTextContent('Last checked:');
+      // Check that it contains a time in the format HH:MM:SS AM/PM
+      expect(lastChecked.textContent).toMatch(/Last checked: \d{1,2}:\d{2}:\d{2} [AP]M/);
+    });
+  });
+
+  it('updates status colors correctly', async () => {
+    mockAxios.get.mockResolvedValueOnce({ data: mockHealthResponse });
+
+    render(<Status />);
+
+    await waitFor(() => {
+      // Check operational status colors
+      expect(screen.getByTestId('overall-status-indicator')).toHaveClass('bg-green-500');
+      expect(screen.getByTestId('llm-server-status-indicator')).toHaveClass('bg-green-500');
+      expect(screen.getByTestId('doc-proc-status-indicator')).toHaveClass('bg-green-500');
+    });
+
+    // Mock error response
+    mockAxios.get.mockResolvedValueOnce({ 
+      data: { 
+        status: 'error',
+        dependencies: {
+          llmServer: { status: 'error' },
+          docProc: { status: 'error' }
+        }
+      } 
+    });
+
+    // Advance timer by 30 seconds
+    act(() => {
+      jest.advanceTimersByTime(30000);
+    });
+
+    await waitFor(() => {
+      // Check error status colors
+      expect(screen.getByTestId('overall-status-indicator')).toHaveClass('bg-red-500');
+      expect(screen.getByTestId('llm-server-status-indicator')).toHaveClass('bg-red-500');
+      expect(screen.getByTestId('doc-proc-status-indicator')).toHaveClass('bg-red-500');
+    });
+  });
 }); 

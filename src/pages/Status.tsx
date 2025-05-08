@@ -106,10 +106,10 @@ const Status: React.FC = () => {
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-lg font-semibold mb-2 text-gray-900">Overall Status</h2>
           <div className="flex items-center mb-2">
-            <div className={`w-3 h-3 ${getStatusColor(healthStatus.status)} rounded-full mr-2`}></div>
+            <div className={`w-3 h-3 ${getStatusColor(healthStatus.status)} rounded-full mr-2`} data-testid="overall-status-indicator"></div>
             <span className="text-gray-600" data-testid="overall-status">{getStatusText(healthStatus.status)}</span>
           </div>
-          <div className="text-sm text-gray-500">
+          <div className="text-sm text-gray-500" data-testid="last-checked">
             Last checked: {lastChecked}
           </div>
         </div>
@@ -117,7 +117,7 @@ const Status: React.FC = () => {
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-lg font-semibold mb-2 text-gray-900">LLM Server</h2>
           <div className="flex items-center mb-2">
-            <div className={`w-3 h-3 ${getStatusColor(healthStatus.dependencies.llmServer.status)} rounded-full mr-2`}></div>
+            <div className={`w-3 h-3 ${getStatusColor(healthStatus.dependencies.llmServer.status)} rounded-full mr-2`} data-testid="llm-server-status-indicator"></div>
             <span className="text-gray-600" data-testid="llm-server-status">{getStatusText(healthStatus.dependencies.llmServer.status)}</span>
           </div>
           {healthStatus.dependencies.llmServer.message && (
@@ -130,7 +130,7 @@ const Status: React.FC = () => {
         <div className="bg-white rounded-lg shadow p-6">
           <h2 className="text-lg font-semibold mb-2 text-gray-900">Document Processing</h2>
           <div className="flex items-center mb-2">
-            <div className={`w-3 h-3 ${getStatusColor(healthStatus.dependencies.docProc.status)} rounded-full mr-2`}></div>
+            <div className={`w-3 h-3 ${getStatusColor(healthStatus.dependencies.docProc.status)} rounded-full mr-2`} data-testid="doc-proc-status-indicator"></div>
             <span className="text-gray-600" data-testid="doc-proc-status">{getStatusText(healthStatus.dependencies.docProc.status)}</span>
           </div>
           {healthStatus.dependencies.docProc.message && (
