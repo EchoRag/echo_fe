@@ -107,7 +107,7 @@ const Status: React.FC = () => {
           <h2 className="text-lg font-semibold mb-2 text-gray-900">Overall Status</h2>
           <div className="flex items-center mb-2">
             <div className={`w-3 h-3 ${getStatusColor(healthStatus.status)} rounded-full mr-2`}></div>
-            <span className="text-gray-600">{getStatusText(healthStatus.status)}</span>
+            <span className="text-gray-600" data-testid="overall-status">{getStatusText(healthStatus.status)}</span>
           </div>
           <div className="text-sm text-gray-500">
             Last checked: {lastChecked}
@@ -118,7 +118,7 @@ const Status: React.FC = () => {
           <h2 className="text-lg font-semibold mb-2 text-gray-900">LLM Server</h2>
           <div className="flex items-center mb-2">
             <div className={`w-3 h-3 ${getStatusColor(healthStatus.dependencies.llmServer.status)} rounded-full mr-2`}></div>
-            <span className="text-gray-600">{getStatusText(healthStatus.dependencies.llmServer.status)}</span>
+            <span className="text-gray-600" data-testid="llm-server-status">{getStatusText(healthStatus.dependencies.llmServer.status)}</span>
           </div>
           {healthStatus.dependencies.llmServer.message && (
             <div className="text-sm text-red-500 mt-2">
@@ -131,7 +131,7 @@ const Status: React.FC = () => {
           <h2 className="text-lg font-semibold mb-2 text-gray-900">Document Processing</h2>
           <div className="flex items-center mb-2">
             <div className={`w-3 h-3 ${getStatusColor(healthStatus.dependencies.docProc.status)} rounded-full mr-2`}></div>
-            <span className="text-gray-600">{getStatusText(healthStatus.dependencies.docProc.status)}</span>
+            <span className="text-gray-600" data-testid="doc-proc-status">{getStatusText(healthStatus.dependencies.docProc.status)}</span>
           </div>
           {healthStatus.dependencies.docProc.message && (
             <div className="text-sm text-red-500 mt-2">
@@ -149,6 +149,7 @@ const Status: React.FC = () => {
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+            data-testid="grafana-dashboard-link"
           >
             View Grafana Dashboard
             <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -166,6 +167,7 @@ const Status: React.FC = () => {
                 ? 'bg-green-500 cursor-not-allowed'
                 : 'bg-red-500 hover:bg-red-600'
             } text-white`}
+            data-testid="start-server-button"
           >
             {isStarting ? (
               <>
@@ -183,7 +185,7 @@ const Status: React.FC = () => {
           </button>
 
           {startError && (
-            <div className="text-red-500 text-sm mt-2">
+            <div className="text-red-500 text-sm mt-2" data-testid="start-error">
               {startError}
             </div>
           )}
