@@ -4,7 +4,7 @@ Echo is a modern project management platform designed to streamline collaboratio
 
 [![Known Vulnerabilities](https://snyk.io/test/github/EchoRag/echo_fe/badge.svg)](https://snyk.io/test/github/EchoRag/echo_fe) 
 
-[![codecov](https://codecov.io/gh/EchoRag/echo_llm/graph/badge.svg?token=CW8863DIWK)](https://codecov.io/gh/EchoRag/echo_llm)
+[![codecov](https://codecov.io/gh/EchoRag/echo_fe/graph/badge.svg?token=4T5FTK6DXX)](https://codecov.io/gh/EchoRag/echo_fe)
 ## Features
 
 - **Project Management**: Create and manage multiple projects with customizable details
