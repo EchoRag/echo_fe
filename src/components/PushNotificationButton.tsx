@@ -25,13 +25,17 @@ const PushNotificationButton: React.FC = () => {
       
       // Check if service workers are supported
       if (!('serviceWorker' in navigator)) {
-        throw new Error('Service workers are not supported by this browser');
+        setError('Service workers are not supported by this browser');
+        setIsLoading(false);
+        return;
       }
 
       // Get user data from browser storage
       const userData = browserStorage.getUserData();
       if (!userData) {
-        throw new Error('User not authenticated');
+        setError('User not authenticated');
+        setIsLoading(false);
+        return;
       }
 
       // Request notification permission
@@ -94,7 +98,7 @@ const PushNotificationButton: React.FC = () => {
         )}
       </Button>
       {error && (
-        <p className="mt-2 text-sm text-red-600">{error}</p>
+        <p className="mt-2 text-sm text-red-600" data-testid="error-message">{error}</p>
       )}
     </div>
   );
