@@ -3,6 +3,7 @@ const API_BASE_URL = '/api/v1';
 export const API_PATHS = {
   PROJECTS: `${API_BASE_URL}/project`,
   PROJECT_DOCUMENTS: (projectId: string) => `${API_BASE_URL}/document/project/${projectId}`,
+  REPROCESS_DOCUMENT: (documentId: string) => `${API_BASE_URL}/document/${documentId}/reprocess`,
   UPLOAD_FILE: `${API_BASE_URL}/document`,
   CHAT_GENERATE: `${API_BASE_URL}/conversations/generate`,
   CONVERSATIONS: `${API_BASE_URL}/conversations`,

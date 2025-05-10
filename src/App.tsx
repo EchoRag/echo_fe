@@ -13,6 +13,7 @@ import { LoginModalProvider, useLoginModal } from './context/LoginModalContext';
 import { useClerk, useAuth } from '@clerk/clerk-react';
 import { AnimatedLogo } from './components/AnimatedLogo'
 import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
+import { ToastProvider } from './components/Toast';
 const SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY;
 
 const Loader = () => (
@@ -57,21 +58,27 @@ function AppLayout({ children }: { children: JSX.Element }) {
   const { user } = useAuthContext();
   const { showLoginModal, closeLoginModal } = useLoginModal();
   const [isSideNavCollapsed, setIsSideNavCollapsed] = useState(true);
+
+  // Calculate left margin based on sidebar state
+  const leftMargin = user ? (isSideNavCollapsed ? 'ml-[60px]' : 'ml-64') : '';
+
   return (
     <>
-      <div className="flex h-full">
+      <div className="flex h-screen  overflow-hidden">
         {user && (
           <div className="fixed inset-y-0 left-0 z-30">
             <SideNav onCollapseChange={setIsSideNavCollapsed} />
           </div>
         )}
-        <div className={`flex-1 transition-all duration-300 ${user ? (isSideNavCollapsed ? 'ml-[60px]' : 'ml-64') : ''}`}>
+        <div className={`flex-1 flex flex-col transition-all duration-300 ${leftMargin}`}>
           {user && (
             <div className={`fixed top-0 right-0 transition-all duration-300 ${isSideNavCollapsed ? 'left-[60px]' : 'left-64'} z-10`}>
               <Navigation />
             </div>
           )}
-          <main className={`container mx-auto px-4 py-8 ${user ? 'mt-16' : ''} overflow-y-auto h-full`}>
+          <main
+            className="flex-1 overflow-y-auto pt-16 px-4 pb-8 "
+          >
             {children}
           </main>
         </div>
@@ -100,37 +107,18 @@ const AppRoutes = () => {
 
 function App() {
   return (
-    <div className="app">
-      {SITE_KEY ? (
-        <GoogleReCaptchaProvider
-          reCaptchaKey={SITE_KEY}
-          scriptProps={{
-            async: true,
-            defer: true,
-          }}
-        >
-          <Router>
-            <AuthProvider>
-              <LoginModalProvider>
-                  <AppRoutes />
-              </LoginModalProvider>
-            </AuthProvider>
-          </Router>
-        </GoogleReCaptchaProvider>
-      ) : (
-        <>
-          {/* "Google reCAPTCHA SITE_KEY is not set." */}
-          <Router>
-            <AuthProvider>
-              <LoginModalProvider>
-                  <AppRoutes />
-              </LoginModalProvider>
-            </AuthProvider>
-          </Router>
-        </>
-      )}
-    </div>
-  )
+    <GoogleReCaptchaProvider reCaptchaKey={SITE_KEY}>
+      <AuthProvider>
+        <LoginModalProvider>
+          <ToastProvider>
+            <Router>
+              <AppRoutes />
+            </Router>
+          </ToastProvider>
+        </LoginModalProvider>
+      </AuthProvider>
+    </GoogleReCaptchaProvider>
+  );
 }
 
 export default App

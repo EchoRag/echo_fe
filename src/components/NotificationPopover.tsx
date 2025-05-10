@@ -214,16 +214,16 @@ export function NotificationPopover({ children }: NotificationPopoverProps) {
         onClick={() => handleNotificationClick(notification)}
       >
         <div className="flex justify-between items-start">
-          <div className="flex-1">
+          <div className="flex-1 min-w-0">
             <div className="flex justify-between">
-              <h4 className="text-sm font-medium text-gray-900">
+              <h4 className="text-sm font-medium text-gray-900 truncate">
                 {notification.title}
               </h4>
-              <span className="text-xs text-gray-500">
+              <span className="text-xs text-gray-500 ml-2 flex-shrink-0">
                 {formatDate(notification.createdAt)}
               </span>
             </div>
-            <p className="mt-1 text-sm text-gray-600">{notification.body}</p>
+            <p className="mt-1 text-sm text-gray-600 line-clamp-2">{notification.body}</p>
           </div>
           {!notification.receipts[0]?.isRead && (
             <button
@@ -231,7 +231,7 @@ export function NotificationPopover({ children }: NotificationPopoverProps) {
                 e.stopPropagation();
                 handleMarkAsRead(notification.id);
               }}
-              className="ml-2 p-1 text-gray-400 hover:text-gray-600"
+              className="ml-2 p-1 text-gray-400 hover:text-gray-600 flex-shrink-0"
               title="Mark as read"
               disabled={loadingNotifications.has(notification.id)}
             >

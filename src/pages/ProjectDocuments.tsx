@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Table, Tooltip } from 'flowbite-react';
+import { Table, Tooltip, Button } from 'flowbite-react';
 import useAxios from '../hooks/useAxios';
 import { API_PATHS } from '../utils/apiPaths';
 import { AnimatedLogo } from '../components/AnimatedLogo';
+import { useToast } from '../components/Toast';
 
 interface Project {
   id: string;
@@ -30,8 +31,9 @@ export default function ProjectDocuments() {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [reprocessingDoc, setReprocessingDoc] = useState<string | null>(null);
   const axios = useAxios();
+  const { showToast } = useToast();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -47,8 +49,8 @@ export default function ProjectDocuments() {
         }
         setDocuments(documentsResponse.data);
       } catch (err) {
-        setError('Failed to fetch data');
         console.error('Error fetching data:', err);
+        showToast('Failed to fetch project data', 'error');
       } finally {
         setLoading(false);
       }
@@ -57,7 +59,7 @@ export default function ProjectDocuments() {
     if (projectId) {
       fetchData();
     }
-  }, [projectId, axios]);
+  }, [projectId, axios, showToast]);
 
   const formatDate = (dateString: string): string => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -86,18 +88,30 @@ export default function ProjectDocuments() {
     return statusConfig[doc.status];
   };
 
+  const handleReprocess = async (docId: string) => {
+    try {
+      setReprocessingDoc(docId);
+      await axios.post(API_PATHS.REPROCESS_DOCUMENT(docId));
+      
+      // Update the document status in the local state
+      setDocuments(docs => docs.map(doc => 
+        doc.id === docId 
+          ? { ...doc, status: 'processing', errorDescription: null }
+          : doc
+      ));
+      showToast('Document reprocessing started', 'success');
+    } catch (err) {
+      console.error('Error reprocessing document:', err);
+      showToast('Failed to reprocess document', 'error');
+    } finally {
+      setReprocessingDoc(null);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-full">
         <AnimatedLogo className="w-full h-full" />
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="text-red-500 text-center p-4">
-        {error}
       </div>
     );
   }
@@ -127,6 +141,7 @@ export default function ProjectDocuments() {
             <Table.HeadCell>Upload Date</Table.HeadCell>
             <Table.HeadCell>Type</Table.HeadCell>
             <Table.HeadCell>Status</Table.HeadCell>
+            <Table.HeadCell>Actions</Table.HeadCell>
           </Table.Head>
           <Table.Body className="divide-y">
             {documents.map((doc) => {
@@ -153,6 +168,36 @@ export default function ProjectDocuments() {
                         {status.text}
                       </span>
                     </Tooltip>
+                  </Table.Cell>
+                  <Table.Cell>
+                    <div className="flex space-x-2">
+                      {(doc.status === 'failed' || doc.status === 'processed') && (
+                        <Button
+                          size="xs"
+                          color="light"
+                          onClick={() => handleReprocess(doc.id)}
+                          disabled={reprocessingDoc === doc.id}
+                          data-testid={`reprocess-${doc.id}`}
+                        >
+                          {reprocessingDoc === doc.id ? (
+                            <>
+                              <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                              </svg>
+                              Reprocessing...
+                            </>
+                          ) : (
+                            <>
+                              <svg className="w-4 h-4 mr-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.651 7.65a7.131 7.131 0 0 0-12.68 3.15M18.001 4v4h-4m-7.652 8.35a7.13 7.13 0 0 0 12.68-3.15M6 20v-4h4"/>
+                              </svg>
+                              Reprocess
+                            </>
+                          )}
+                        </Button>
+                      )}
+                    </div>
                   </Table.Cell>
                 </Table.Row>
               );
